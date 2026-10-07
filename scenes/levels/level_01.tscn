@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cc7ioc2lmanhd"]
+
+[ext_resource type="PackedScene" uid="uid://bw0v5fwcd0d63" path="res://scenes/player.tscn" id="1_uvc87"]
+[ext_resource type="PackedScene" uid="uid://cd0vpgx0b4eea" path="res://scenes/spike.tscn" id="2_qdh5e"]
+[ext_resource type="PackedScene" uid="uid://c0cbeknq3bj3o" path="res://scenes/goal.tscn" id="3_50wog"]
+[ext_resource type="PackedScene" uid="uid://d1fpxw8ea38t5" path="res://scenes/platform.tscn" id="4_1ey3t"]
+
+[node name="Level01" type="Node2D" unique_id=170237254]
+
+[node name="Player" parent="." unique_id=1725161371 instance=ExtResource("1_uvc87")]
+position = Vector2(100, 350)
+
+[node name="Spike" parent="." unique_id=535882844 instance=ExtResource("2_qdh5e")]
+position = Vector2(700, 400)
+
+[node name="Spike2" parent="." unique_id=1511511951 instance=ExtResource("2_qdh5e")]
+position = Vector2(1700, 400)
+
+[node name="Spike3" parent="." unique_id=1020165429 instance=ExtResource("2_qdh5e")]
+position = Vector2(1740, 400)
+
+[node name="Goal" parent="." unique_id=396304678 instance=ExtResource("3_50wog")]
+position = Vector2(3240, 400)
+
+[node name="Platform" parent="." unique_id=299600445 instance=ExtResource("4_1ey3t")]
+position = Vector2(0, 400)
+size = Vector2(1200, 200)
+
+[node name="Platform2" parent="." unique_id=916584222 instance=ExtResource("4_1ey3t")]
+position = Vector2(1300, 400)
+size = Vector2(1000, 200)
+
+[node name="Platform3" parent="." unique_id=1552734861 instance=ExtResource("4_1ey3t")]
+position = Vector2(2450, 400)
+size = Vector2(800, 200)
