@@ -8,10 +8,6 @@ size = Vector2(24, 40)
 [node name="Spike" type="Area2D" unique_id=535882844]
 script = ExtResource("1_xanym")
 
-[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1474894982]
-color = Color(1, 0, 0, 1)
-polygon = PackedVector2Array(-20, 0, 20, 0, 0, -40)
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1718583667]
 position = Vector2(0, -10)
 shape = SubResource("RectangleShape2D_e2o6t")

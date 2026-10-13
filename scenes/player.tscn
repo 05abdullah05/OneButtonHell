@@ -19,4 +19,6 @@ metadata/_edit_lock_ = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1339943562]
 offset = Vector2(300, 0)
+drag_vertical_enabled = true
+drag_top_margin = 0.6
 metadata/_edit_lock_ = true
