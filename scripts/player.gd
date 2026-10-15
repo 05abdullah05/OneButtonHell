@@ -10,9 +10,12 @@ extends CharacterBody2D
 @export var jump_buffer_time: float = 0.1     # seconds a too-early press is remembered
 @export var death_y: float = 1000.0           # falling below this line = death
 
+@onready var visual: PlayerVisual = $Visual
+
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
 var is_dead: bool = false
+var was_on_floor: bool = true
 
 
 func _physics_process(delta: float) -> void:
@@ -40,15 +43,28 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
+		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
 
 	# 5. Variable jump height: letting go early cuts the upward speed.
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
 		velocity.y *= jump_cut_multiplier
 
 	# 6. Let Godot move the body and resolve collisions.
+	# Save the falling speed first: move_and_slide sets it to 0 on landing.
+	var fall_speed := velocity.y
 	move_and_slide()
 
-	# 7. Fell into a gap?
+	# 7. Landing: squash flat, harder after a bigger fall.
+	var on_floor_now := is_on_floor()
+	if on_floor_now and not was_on_floor:
+		var amount := clampf(fall_speed / 2000.0, 0.1, 0.35)
+		visual.squash(Vector2(1.0 + amount, 1.0 - amount))
+	was_on_floor = on_floor_now
+
+	# 8. Tell the visual which pose to show.
+	visual.set_state(on_floor_now, velocity.y)
+
+	# 9. Fell into a gap?
 	if global_position.y > death_y:
 		die()
 

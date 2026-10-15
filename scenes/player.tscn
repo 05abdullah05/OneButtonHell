@@ -1,20 +1,17 @@
 [gd_scene format=3 uid="uid://bw0v5fwcd0d63"]
 
 [ext_resource type="Script" uid="uid://b5rgjptr5aa5a" path="res://scripts/player.gd" id="1_4flbx"]
+[ext_resource type="Script" uid="uid://dmretcroh1cxv" path="res://scripts/player_visual.gd" id="2_g2els"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mwb40"]
-size = Vector2(40, 60)
+size = Vector2(24, 56)
 
 [node name="Player" type="CharacterBody2D" unique_id=1725161371]
 script = ExtResource("1_4flbx")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=602941031]
+position = Vector2(0, 2)
 shape = SubResource("RectangleShape2D_mwb40")
-metadata/_edit_lock_ = true
-
-[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1886651673]
-polygon = PackedVector2Array(-20, -30, 20, -30, 20, 30, -20, 30)
-uv = PackedVector2Array(-20, -30, 20, -30, 20, 30, -20, 30)
 metadata/_edit_lock_ = true
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1339943562]
@@ -22,3 +19,7 @@ offset = Vector2(300, 0)
 drag_vertical_enabled = true
 drag_top_margin = 0.6
 metadata/_edit_lock_ = true
+
+[node name="Visual" type="Node2D" parent="." unique_id=1537566249]
+position = Vector2(0, 30)
+script = ExtResource("2_g2els")
