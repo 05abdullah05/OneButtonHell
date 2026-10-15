@@ -9,8 +9,13 @@ extends CharacterBody2D
 @export var coyote_time: float = 0.1          # seconds you can still jump after leaving a ledge
 @export var jump_buffer_time: float = 0.1     # seconds a too-early press is remembered
 @export var death_y: float = 1000.0           # falling below this line = death
+@export var death_pause: float = 0.55         # seconds before restarting after death
+
+const DUST := [Color("eee8d5"), Color("cfc6ab"), Color("8fd16f")]
+const FEET := Vector2(0, 30)                  # offset from center to the feet
 
 @onready var visual: PlayerVisual = $Visual
+@onready var camera: ShakeCamera = $Camera2D
 
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
@@ -44,6 +49,8 @@ func _physics_process(delta: float) -> void:
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
 		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
+		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
+				6, 110.0, Vector2.UP, 70.0, 5.0, 0.35, 300.0)
 
 	# 5. Variable jump height: letting go early cuts the upward speed.
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
@@ -54,11 +61,15 @@ func _physics_process(delta: float) -> void:
 	var fall_speed := velocity.y
 	move_and_slide()
 
-	# 7. Landing: squash flat, harder after a bigger fall.
+	# 7. Landing: squash + dust, both bigger after a bigger fall.
 	var on_floor_now := is_on_floor()
 	if on_floor_now and not was_on_floor:
 		var amount := clampf(fall_speed / 2000.0, 0.1, 0.35)
 		visual.squash(Vector2(1.0 + amount, 1.0 - amount))
+		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
+				int(4 + amount * 20), 140.0, Vector2.UP, 85.0, 5.0, 0.35, 300.0)
+		if amount >= 0.3:
+			camera.shake(4.0)              # small shake only on hard landings
 	was_on_floor = on_floor_now
 
 	# 8. Tell the visual which pose to show.
@@ -73,6 +84,27 @@ func die() -> void:
 	if is_dead:
 		return
 	is_dead = true
-	# Instant restart. call_deferred waits until the physics step is finished,
-	# because removing physics objects in the middle of one causes errors.
+	velocity = Vector2.ZERO
+
+	# Burst into pieces in the character's own colors.
+	visual.visible = false
+	FX.burst(_level(), global_position, PackedColorArray([
+			visual.shirt_color, visual.skin_color, visual.hair_color, visual.pants_color]),
+			30, 420.0, Vector2.UP, 180.0, 7.0, 0.8, 900.0)
+	camera.shake(14.0)
+
+	# Hit-stop: almost freeze the game for a split second so the hit "lands".
+	# The timer ignores time_scale, otherwise it would also be slowed down.
+	Engine.time_scale = 0.05
+	await get_tree().create_timer(0.08, true, false, true).timeout
+	Engine.time_scale = 1.0
+
+	# Short pause so the player sees what happened, then restart.
+	await get_tree().create_timer(death_pause).timeout
 	get_tree().reload_current_scene.call_deferred()
+
+
+# Particles are added to the level, not the player, so they stay
+# where they spawned instead of following the player around.
+func _level() -> Node:
+	return get_tree().current_scene

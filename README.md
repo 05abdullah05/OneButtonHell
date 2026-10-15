@@ -50,3 +50,58 @@ The player runs automatically; the only input is jump (Space / left mouse button
   view doesn't bounce every time the player jumps.
 - Bug found: two Background instances, one drawn in front of everything.
   Fixed by removing the duplicate.
+
+
+
+
+  ### Character + squash & stretch (14/10)
+- Player visual drawn in code (PlayerVisual, @tool): head, hair, face,
+  shirt, arms, legs, with a dark outline so it reads on every background.
+- Purple shirt: not red (danger) or green (goal), and stands out against
+  sky, bushes and stone.
+- Three poses chosen from physics state: run cycle (sin/cos for legs and
+  arms, opposite phase), rising (tucked), falling (arms out, legs down).
+- Eyes look in the running direction; mouth opens in the air.
+- Squash & stretch: stretch (0.7, 1.3) on takeoff, squash on landing
+  scaled by fall speed (bigger fall = bigger squash).
+- Visual origin at the feet, so scaling keeps the feet on the ground.
+- Scale eases back with lerp using 1 - exp(-k * delta) =
+  frame-rate independent smoothing.
+- Separation: Player (physics/logic) tells PlayerVisual (drawing) what
+  happens via set_state() and squash(). Logic and visuals stay separate.
+- Hitbox shrunk to 24x56 to match the narrower character (fair deaths).
+
+
+For the exam
+Squash and stretch is one of the classic animation principles. It makes motion feel elastic and gives every jump and landing physical weight without any extra mechanic. It's feedback the player feels rather than reads.
+Separating logic from visuals means player.gd only handles physics and rules, while PlayerVisual only handles drawing. You could swap the art for a sprite later without touching the movement code.
+The fall_speed detail shows careful debugging: move_and_slide() sets velocity.y to 0 on landing, so the speed has to be saved before the call.
+
+
+
+
+
+### Juice / feedback (15/10)
+- FX helper (static function) spawns one-shot CPUParticles2D bursts in
+  code: random colors per particle, shrink over lifetime, auto-deleted
+  when finished (no memory build-up).
+- Dust on jump and landing; landing dust scales with fall speed.
+- Death: character bursts into pieces in its own colors + screen shake.
+- Hit-stop: Engine.time_scale = 0.05 for 0.08 s at death so the hit
+  "lands". The timer ignores time_scale, otherwise it would be slowed too.
+- Death pause 0.55 s: the player sees what killed them, but restart is
+  still fast enough to keep the "one more try" flow.
+- Screen shake on the Camera2D: random offset added to the base offset,
+  decays with frame-rate independent smoothing. Strong on death, light on
+  hard landings, so its intensity carries meaning.
+- Goal: confetti + 1 s celebration before restarting/next level.
+  `reached` flag prevents triggering twice.
+- Particles are added to the level, not the player, so they stay where
+  they spawned.
+- Fixed: Void polygon points in wrong order made a bowtie shape.
+
+For the exam
+Feedback scales with the event. Small hop, small puff; big fall, big puff and a shake; death, explosion, freeze and a big shake. Since effect size matches how important an event is, the player learns what matters without being told. That's the "visual cues and feedback" criterion directly.
+Hit-stop is used in games like Celeste and fighting games. A tiny freeze makes an impact feel heavy, and here it also makes clear exactly what killed you.
+Fast restart is a design choice. A long death screen punishes the player; a short pause plus an instant retry keeps them in the flow, which matters in a hard, short-level game like this.
+await with timers lets one function describe a whole sequence in order (freeze, unfreeze, wait, restart) without a state machine.
