@@ -19,9 +19,10 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	reached = true
 
-	# Celebrate: confetti from the top of the flag.
+	# Celebrate: confetti from the top of the flag + fanfare.
 	FX.burst(get_tree().current_scene, global_position + Vector2(0, -200),
 			PackedColorArray(CONFETTI), 40, 450.0, Vector2.UP, 50.0, 6.0, 1.2, 700.0)
+	Audio.play("goal")
 
 	await get_tree().create_timer(finish_delay).timeout
 	if next_level == "":

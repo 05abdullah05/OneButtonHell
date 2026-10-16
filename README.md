@@ -105,3 +105,30 @@ Feedback scales with the event. Small hop, small puff; big fall, big puff and a 
 Hit-stop is used in games like Celeste and fighting games. A tiny freeze makes an impact feel heavy, and here it also makes clear exactly what killed you.
 Fast restart is a design choice. A long death screen punishes the player; a short pause plus an instant retry keeps them in the flow, which matters in a hard, short-level game like this.
 await with timers lets one function describe a whole sequence in order (freeze, unfreeze, wait, restart) without a state machine.
+
+
+
+
+### Audio (16/10)
+- All sounds and music generated from basic waveforms (square, triangle,
+  noise) with tools/make_sounds.py: no licensing issues.
+- Sounds: jump (rising chirp), spike death (crunch + falling "pheww"),
+  pit fall (slide whistle fading into silence), goal fanfare, coin.
+- Music: 16-bar chiptune loop (Am-F-C-G), 150 BPM.
+- Audio manager is an autoload ("Audio"): created once, survives scene
+  reloads, so the music doesn't restart after every death.
+- Pool of 8 AudioStreamPlayers reused in turn: sounds can overlap without
+  creating new nodes each time.
+- Random pitch variation on the jump sound so the most frequent sound
+  never feels repetitive.
+- Pit fall: whistle starts when the player drops below the ground (pit_y),
+  and the music fades out with a Tween, like falling down a well. It
+  fades back in on restart. Spike and pit deaths sound different, so the
+  player hears what killed them.
+
+  
+For the exam
+Autoload (singleton): a node Godot creates at startup that lives outside the scenes. That's why the music survives reload_current_scene(); a music player inside the level would restart on every death, which gets very annoying in a game where you die often.
+Sound tells the player what happened. Spike and pit deaths sound different, so the player knows the cause without looking. That's the "auditory cues" part of the teaching criterion.
+Pitch variation: the jump is the most frequent sound in the game. A small random change in pitch keeps it from sounding mechanical over hundreds of jumps.
+Tweens animate a property smoothly over time, here the music volume, with one line of code.

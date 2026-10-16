@@ -9,6 +9,7 @@ extends CharacterBody2D
 @export var coyote_time: float = 0.1          # seconds you can still jump after leaving a ledge
 @export var jump_buffer_time: float = 0.1     # seconds a too-early press is remembered
 @export var death_y: float = 1000.0           # falling below this line = death
+@export var pit_y: float = 480.0              # below this = falling into a pit (sound starts)
 @export var death_pause: float = 0.55         # seconds before restarting after death
 
 const DUST := [Color("eee8d5"), Color("cfc6ab"), Color("8fd16f")]
@@ -21,6 +22,12 @@ var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
 var is_dead: bool = false
 var was_on_floor: bool = true
+var is_falling_in_pit: bool = false
+
+
+func _ready() -> void:
+	# A new attempt: bring the music back if it was faded out by a pit fall.
+	Audio.set_music_ducked(false, 0.5)
 
 
 func _physics_process(delta: float) -> void:
@@ -51,6 +58,7 @@ func _physics_process(delta: float) -> void:
 		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
 		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
 				6, 110.0, Vector2.UP, 70.0, 5.0, 0.35, 300.0)
+		Audio.play("jump", -6.0, 0.08)
 
 	# 5. Variable jump height: letting go early cuts the upward speed.
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
@@ -75,12 +83,19 @@ func _physics_process(delta: float) -> void:
 	# 8. Tell the visual which pose to show.
 	visual.set_state(on_floor_now, velocity.y)
 
-	# 9. Fell into a gap?
+	# 9. Falling into a pit: whistle down and fade the music, like dropping in a well.
+	if not is_falling_in_pit and global_position.y > pit_y:
+		is_falling_in_pit = true
+		Audio.play("fall", -2.0)
+		Audio.set_music_ducked(true, 0.8)
+
+	# 10. Fell far enough = dead.
 	if global_position.y > death_y:
-		die()
+		die("fall")
 
 
-func die() -> void:
+# cause: "spike" (default, used by spikes) or "fall" (pits).
+func die(cause: String = "spike") -> void:
 	if is_dead:
 		return
 	is_dead = true
@@ -92,6 +107,9 @@ func die() -> void:
 			visual.shirt_color, visual.skin_color, visual.hair_color, visual.pants_color]),
 			30, 420.0, Vector2.UP, 180.0, 7.0, 0.8, 900.0)
 	camera.shake(14.0)
+	if cause == "spike":
+		Audio.play("death")
+	# (a pit fall already played its whistle, so no extra sound)
 
 	# Hit-stop: almost freeze the game for a split second so the hit "lands".
 	# The timer ignores time_scale, otherwise it would also be slowed down.
