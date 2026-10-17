@@ -132,3 +132,31 @@ Autoload (singleton): a node Godot creates at startup that lives outside the sce
 Sound tells the player what happened. Spike and pit deaths sound different, so the player knows the cause without looking. That's the "auditory cues" part of the teaching criterion.
 Pitch variation: the jump is the most frequent sound in the game. A small random change in pitch keeps it from sounding mechanical over hundreds of jumps.
 Tweens animate a property smoothly over time, here the music volume, with one line of code.
+
+
+
+### Coins + HUD + GameManager (17/10)
+- Coin: Area2D drawn in code, spins (width squeezed with cos) and bobs.
+  Collect = sparkles + sound + counter update.
+- Coin hitbox (r=18) is bigger than its drawing (r=13): rewards are easy
+  to grab, hazards (spikes) have smaller hitboxes. Generous both ways.
+- GameManager autoload: coins this attempt, total coins, deaths in the
+  current level. Survives reloads, so deaths keep counting; coins reset
+  each attempt, so all coins require one clean run (skill element).
+- Signal coins_changed: the HUD reacts when a coin is collected
+  instead of checking every frame (observer pattern).
+- level.gd on every level root: counts coins via the "coins" group.
+  Works because a parent's _ready runs after all its children's.
+- HUD in a CanvasLayer (fixed on screen, ignores camera), drawn in code:
+  coin counter with "pop" animation, death counter, progress bar
+  (player marker moving toward a flag) = shows how far you are without text.
+- HUD ignores mouse input, so clicking still jumps.
+- Level 1 coins along the main path; first coin is free (teaches what
+  coins are), one needs a full held jump.
+
+
+### For the exam
+Groups are Godot's tags. Nodes join a group like "coins," "player" or "goal," and any script can find them without knowing where they sit in the tree. That keeps scenes loosely connected.
+Signals vs. polling: the HUD's coin pop is triggered by the coins_changed signal, so it reacts exactly when something happens. The progress bar does read the player position every frame, because that changes continuously. Knowing when to use which is good design reasoning.
+Coins reset on death is a design choice: collecting everything requires a clean run, which separates experienced players from beginners. That's the "skill" criterion.
+The progress bar answers "how far is it?" without words, and makes near-misses motivating ("I was at 90%!").

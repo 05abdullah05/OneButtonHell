@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://dg8enhln6lkgo"]
+
+[ext_resource type="Script" uid="uid://chdq42wxmko7i" path="res://scripts/hud.gd" id="1_ahhtf"]
+
+[node name="HUD" type="CanvasLayer" unique_id=1609329980]
+
+[node name="Display" type="Control" parent="." unique_id=843866078]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_ahhtf")

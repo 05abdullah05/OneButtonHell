@@ -11,6 +11,7 @@ var reached: bool = false
 
 
 func _ready() -> void:
+	add_to_group("goal")     # so the HUD can find the goal for the progress bar
 	body_entered.connect(_on_body_entered)
 
 

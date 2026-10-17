@@ -26,6 +26,7 @@ var is_falling_in_pit: bool = false
 
 
 func _ready() -> void:
+	add_to_group("player")   # so the HUD can find the player
 	# A new attempt: bring the music back if it was faded out by a pit fall.
 	Audio.set_music_ducked(false, 0.5)
 
@@ -100,6 +101,7 @@ func die(cause: String = "spike") -> void:
 		return
 	is_dead = true
 	velocity = Vector2.ZERO
+	GameManager.add_death()
 
 	# Burst into pieces in the character's own colors.
 	visual.visible = false

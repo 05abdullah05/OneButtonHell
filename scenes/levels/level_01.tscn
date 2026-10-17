@@ -1,12 +1,16 @@
 [gd_scene format=3 uid="uid://cc7ioc2lmanhd"]
 
 [ext_resource type="PackedScene" uid="uid://dmglinqbr8cfg" path="res://scenes/background.tscn" id="1_qdh5e"]
+[ext_resource type="Script" uid="uid://bxaqqokfc67mf" path="res://scripts/level.gd" id="1_t0hvh"]
 [ext_resource type="PackedScene" uid="uid://bw0v5fwcd0d63" path="res://scenes/player.tscn" id="1_uvc87"]
 [ext_resource type="PackedScene" uid="uid://cd0vpgx0b4eea" path="res://scenes/spike.tscn" id="2_qdh5e"]
 [ext_resource type="PackedScene" uid="uid://c0cbeknq3bj3o" path="res://scenes/goal.tscn" id="3_50wog"]
 [ext_resource type="PackedScene" uid="uid://d1fpxw8ea38t5" path="res://scenes/platform.tscn" id="4_1ey3t"]
+[ext_resource type="PackedScene" uid="uid://c7un5gsbshi07" path="res://scenes/coin.tscn" id="6_50wog"]
+[ext_resource type="PackedScene" uid="uid://dg8enhln6lkgo" path="res://scenes/hud.tscn" id="7_1ey3t"]
 
 [node name="Level01" type="Node2D" unique_id=170237254]
+script = ExtResource("1_t0hvh")
 
 [node name="Background" parent="." unique_id=1290361194 instance=ExtResource("1_qdh5e")]
 
@@ -46,3 +50,20 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 10
 theme_override_font_sizes/font_size = 31
 text = "ONE BUTTON HELL"
+
+[node name="Coin" parent="." unique_id=649914032 instance=ExtResource("6_50wog")]
+position = Vector2(450, 360)
+
+[node name="HUD" parent="." unique_id=1609329980 instance=ExtResource("7_1ey3t")]
+
+[node name="Coin2" parent="." unique_id=2100809956 instance=ExtResource("6_50wog")]
+position = Vector2(700, 290)
+
+[node name="Coin3" parent="." unique_id=1252211774 instance=ExtResource("6_50wog")]
+position = Vector2(1250, 280)
+
+[node name="Coin4" parent="." unique_id=1584585797 instance=ExtResource("6_50wog")]
+position = Vector2(1720, 255)
+
+[node name="Coin5" parent="." unique_id=1120685435 instance=ExtResource("6_50wog")]
+position = Vector2(2375, 280)
