@@ -11,6 +11,7 @@ extends CharacterBody2D
 @export var death_y: float = 1000.0           # falling below this line = death
 @export var pit_y: float = 480.0              # below this = falling into a pit (sound starts)
 @export var death_pause: float = 0.55         # seconds before restarting after death
+@export var finish_brake: float = 900.0       # how fast the player stops at the goal
 
 const DUST := [Color("eee8d5"), Color("cfc6ab"), Color("8fd16f")]
 const FEET := Vector2(0, 30)                  # offset from center to the feet
@@ -21,6 +22,7 @@ const FEET := Vector2(0, 30)                  # offset from center to the feet
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
 var is_dead: bool = false
+var is_finished: bool = false
 var was_on_floor: bool = true
 var is_falling_in_pit: bool = false
 
@@ -35,8 +37,11 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
-	# 1. Auto-run: the player never controls horizontal movement.
-	velocity.x = run_speed
+	# 1. Auto-run. After the goal: brake smoothly to a stop instead.
+	if is_finished:
+		velocity.x = move_toward(velocity.x, 0.0, finish_brake * delta)
+	else:
+		velocity.x = run_speed
 
 	# 2. Gravity + coyote time.
 	if is_on_floor():
@@ -45,25 +50,9 @@ func _physics_process(delta: float) -> void:
 		coyote_timer -= delta
 		velocity.y += gravity * delta
 
-	# 3. Jump buffer: remember a press for a short moment.
-	if Input.is_action_just_pressed("jump"):
-		jump_buffer_timer = jump_buffer_time
-	else:
-		jump_buffer_timer -= delta
-
-	# 4. Jump if a press is buffered AND we are (or just were) on the ground.
-	if jump_buffer_timer > 0.0 and coyote_timer > 0.0:
-		velocity.y = jump_velocity
-		jump_buffer_timer = 0.0
-		coyote_timer = 0.0
-		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
-		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
-				6, 110.0, Vector2.UP, 70.0, 5.0, 0.35, 300.0)
-		Audio.play("jump", -6.0, 0.08)
-
-	# 5. Variable jump height: letting go early cuts the upward speed.
-	if Input.is_action_just_released("jump") and velocity.y < 0.0:
-		velocity.y *= jump_cut_multiplier
+	# 3-5. Jumping (not possible after the goal).
+	if not is_finished:
+		_handle_jump(delta)
 
 	# 6. Let Godot move the body and resolve collisions.
 	# Save the falling speed first: move_and_slide sets it to 0 on landing.
@@ -82,7 +71,7 @@ func _physics_process(delta: float) -> void:
 	was_on_floor = on_floor_now
 
 	# 8. Tell the visual which pose to show.
-	visual.set_state(on_floor_now, velocity.y)
+	visual.set_state(on_floor_now, velocity.y, absf(velocity.x) > 20.0)
 
 	# 9. Falling into a pit: whistle down and fade the music, like dropping in a well.
 	if not is_falling_in_pit and global_position.y > pit_y:
@@ -95,9 +84,37 @@ func _physics_process(delta: float) -> void:
 		die("fall")
 
 
+func _handle_jump(delta: float) -> void:
+	# Jump buffer: remember a press for a short moment.
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = jump_buffer_time
+	else:
+		jump_buffer_timer -= delta
+
+	# Jump if a press is buffered AND we are (or just were) on the ground.
+	if jump_buffer_timer > 0.0 and coyote_timer > 0.0:
+		velocity.y = jump_velocity
+		jump_buffer_timer = 0.0
+		coyote_timer = 0.0
+		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
+		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
+				6, 110.0, Vector2.UP, 70.0, 5.0, 0.35, 300.0)
+		Audio.play("jump", -6.0, 0.08)
+
+	# Variable jump height: letting go early cuts the upward speed.
+	if Input.is_action_just_released("jump") and velocity.y < 0.0:
+		velocity.y *= jump_cut_multiplier
+
+
+# Called by the goal: stop running and celebrate.
+func finish() -> void:
+	is_finished = true
+	visual.celebrating = true
+
+
 # cause: "spike" (default, used by spikes) or "fall" (pits).
 func die(cause: String = "spike") -> void:
-	if is_dead:
+	if is_dead or is_finished:
 		return
 	is_dead = true
 	velocity = Vector2.ZERO

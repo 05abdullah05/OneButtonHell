@@ -16,6 +16,8 @@ const OUTLINE := Color("1a202c")
 
 var on_floor: bool = true
 var vertical_speed: float = 0.0
+var moving: bool = true
+var celebrating: bool = false
 var run_time: float = 0.0
 
 
@@ -28,9 +30,10 @@ func _process(delta: float) -> void:
 
 
 # Called by the player every physics frame.
-func set_state(floor_now: bool, vy: float) -> void:
+func set_state(floor_now: bool, vy: float, is_moving: bool = true) -> void:
 	on_floor = floor_now
 	vertical_speed = vy
+	moving = is_moving
 
 
 # Instantly deform; _process eases it back to normal.
@@ -50,7 +53,16 @@ func _draw() -> void:
 	var bob := 0.0
 	var mouth_open := false
 
-	if on_floor:
+	if celebrating and on_floor and not moving:
+		# Victory: feet planted, both arms up, little cheering bounce.
+		foot_l = Vector2(-7, 0)
+		foot_r = Vector2(7, 0)
+		var wave := sin(run_time * 0.6) * 3.0
+		hand_l = shoulder_l + Vector2(-7, -15 + wave)
+		hand_r = shoulder_r + Vector2(7, -15 - wave)
+		bob = -absf(sin(run_time * 0.3)) * 3.0
+		mouth_open = true
+	elif on_floor:
 		# Run cycle: legs swing opposite to each other, arms opposite to legs.
 		var s := sin(run_time)
 		foot_l = Vector2(-5 + s * 9, -maxf(0.0, -cos(run_time)) * 6)
@@ -109,7 +121,7 @@ func _draw() -> void:
 		draw_circle(head + Vector2(ex, 2), 3.0, Color.WHITE)
 		draw_circle(head + Vector2(ex + 1.0, 2), 1.6, OUTLINE)
 
-	# Mouth: open "o" in the air, small smile on the ground
+	# Mouth: open "o" in the air or when cheering, small smile otherwise
 	if mouth_open:
 		draw_circle(head + Vector2(6, 8), 2.2, OUTLINE)
 	else:

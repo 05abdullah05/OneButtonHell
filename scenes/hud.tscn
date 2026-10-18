@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://dg8enhln6lkgo"]
 
 [ext_resource type="Script" uid="uid://chdq42wxmko7i" path="res://scripts/hud.gd" id="1_ahhtf"]
+[ext_resource type="Script" uid="uid://dhwqov3dfey16" path="res://scripts/pause_menu.gd" id="2_5ysmq"]
+[ext_resource type="Script" uid="uid://o36mwio55iem" path="res://scripts/level_complete.gd" id="3_6fi6k"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1609329980]
 
@@ -10,3 +12,17 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_ahhtf")
+
+[node name="PauseMenu" type="Control" parent="." unique_id=2045306208]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_5ysmq")
+
+[node name="LevelComplete" type="Control" parent="." unique_id=564812447]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_6fi6k")

@@ -160,3 +160,31 @@ Groups are Godot's tags. Nodes join a group like "coins," "player" or "goal," an
 Signals vs. polling: the HUD's coin pop is triggered by the coins_changed signal, so it reacts exactly when something happens. The progress bar does read the player position every frame, because that changes continuously. Knowing when to use which is good design reasoning.
 Coins reset on death is a design choice: collecting everything requires a clean run, which separates experienced players from beginners. That's the "skill" criterion.
 The progress bar answers "how far is it?" without words, and makes near-misses motivating ("I was at 90%!").
+
+
+### Level complete + pause menu (18/10)
+- GameManager holds the level order (LEVELS list) and all navigation:
+  next level, restart, main menu. One place to add new levels.
+- Level complete screen: coins x/y, "All coins collected!", deaths, best
+  coins, buttons Next Level / Replay / Main Menu. Last level shows
+  "YOU BEAT THE GAME!" without Next. Fades in after the confetti.
+- Signal level_completed: the goal doesn't know about the UI, it just
+  reports to GameManager and the screen reacts (loose coupling).
+- Pause menu (Esc/P): get_tree().paused stops the game; the menu uses
+  PROCESS_MODE_ALWAYS so it keeps working while everything else is paused.
+- Every new scene unpauses in start_level, so the game can never get
+  stuck paused after a restart.
+- One-button friendly: first button is preselected, Space/Enter presses
+  it, with a white border showing the selection.
+- UIKit: shared code-built styles (StyleBoxFlat) so all menus match the
+  game's colors (purple buttons, gold titles).
+- Bug fixed: player ran off the last platform after the goal and died.
+  Now finish() brakes to a stop and shows a victory pose; die() is
+  ignored after finishing.
+
+
+For the exam
+Pausing in Godot: get_tree().paused = true stops every node whose process mode is "pausable" (the default), and nodes set to ALWAYS keep running. That's why the pause menu can still respond while the game is frozen.
+Centralizing the level order: levels don't point to each other; GameManager owns the list. Adding, removing or reordering levels is a one-line change, with no risk of a broken chain between levels.
+Feedback loop for skill: the complete screen shows coins, deaths and your best. Experienced players get a reason to replay ("can I get all 5 with zero deaths?"), which supports the skill criterion beyond simply finishing.
+Bug found by playtesting: the post-goal death came from actually playing and noticing. Mention it as part of your testing story.
