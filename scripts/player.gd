@@ -79,7 +79,13 @@ func _physics_process(delta: float) -> void:
 		Audio.play("fall", -2.0)
 		Audio.set_music_ducked(true, 0.8)
 
-	# 10. Fell far enough = dead.
+	# 10. Ran into the side of a platform = crash. Without this the
+	# auto-runner would be stuck pushing against the wall forever.
+	if is_on_wall():
+		die("spike")
+		return
+
+	# 11. Fell far enough = dead.
 	if global_position.y > death_y:
 		die("fall")
 
@@ -104,6 +110,13 @@ func _handle_jump(delta: float) -> void:
 	# Variable jump height: letting go early cuts the upward speed.
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
 		velocity.y *= jump_cut_multiplier
+
+
+# Called by speed pads. The camera looks further ahead at higher speed,
+# so the player still gets the same reaction time to see obstacles.
+func set_run_speed(new_speed: float) -> void:
+	run_speed = new_speed
+	camera.set_look_ahead(new_speed)
 
 
 # Called by the goal: stop running and celebrate.

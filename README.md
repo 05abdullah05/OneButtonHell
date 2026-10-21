@@ -188,3 +188,57 @@ Pausing in Godot: get_tree().paused = true stops every node whose process mode i
 Centralizing the level order: levels don't point to each other; GameManager owns the list. Adding, removing or reordering levels is a one-line change, with no risk of a broken chain between levels.
 Feedback loop for skill: the complete screen shows coins, deaths and your best. Experienced players get a reason to replay ("can I get all 5 with zero deaths?"), which supports the skill criterion beyond simply finishing.
 Bug found by playtesting: the post-goal death came from actually playing and noticing. Mention it as part of your testing story.
+
+
+
+### Main menu + saved progress (19/10, done 20/10)
+- Main menu scene reuses Background, Platform and PlayerVisual: same
+  world as the game, character running on the ground.
+- Pages built in code (main, levels, credits) with the shared UIKit.
+- Levels unlock in order (beat level N to open N+1), so players meet
+  the difficulty curve in the intended order = progression.
+- Level select shows best coins per level ("4 / 5") = replay goal for
+  skilled players.
+- Progress saved with ConfigFile to user://save.cfg (no account needed),
+  loaded when the game starts.
+- Reset Progress needs two presses (prevents accidents).
+- Testing cheat: U on the Levels page unlocks all levels for the
+  session only, never saved.
+- Fully playable with one button: first button preselected, Space
+  presses it; Esc = back.
+- Credits instead of contact details: the game and videos are public.
+
+
+### For the exam
+user:// vs res://: res:// is the game's own files, read-only once exported. user:// is a per-player folder Godot creates on their computer (on Windows, inside AppData), where the game is allowed to write. That's why the save file goes there.
+ConfigFile is Godot's simple key-value format, like a small settings file. It handles dictionaries and arrays directly, so saving progress takes just a few lines.
+Locked levels serve the design: unlocking in order ensures every player experiences the teaching levels before the hard ones. A beginner can't skip straight into level 6 and get confused by mechanics never introduced.
+
+
+
+
+### Levels 2-3 + speed pads + first export (20/10, done 21/10)
+- Level 2 "Patterns": spike rhythm (jump-land-jump), step-up platform,
+  triple spike (needs a held jump), floating platform with 2 coins over
+  the safe path (risk/reward), spike right after a landing.
+- Level 3 "Faster": speed pads (cyan chevrons; cyan only ever means
+  speed) take the run speed 300 -> 380 -> 450. Introduced on an easy
+  stretch first, then combined with gaps and spikes.
+- Camera look-ahead grows with speed (tweened), so reaction time stays
+  fair at higher speed.
+- Wall crash: hitting the side of a platform = death (an auto-runner
+  would otherwise be stuck pushing against the wall forever).
+- Levels validated with a physics simulation (tools/sim.py, solve.py):
+  same gravity, jump, hitboxes and coyote time as the game. Checks
+  that each level is finishable with full jumps only (beginner), not
+  with taps only, and that all coins can be taken in one run.
+- Level files generated from validated layouts, then tested by playing.
+- First Windows export (single .exe, embedded PCK) to catch export
+  problems early.
+
+
+For the exam
+Design reasoning for level 2: each section tests one idea from level 1 in a harder form: rhythm instead of a single spike, a held jump instead of any jump, height instead of flat ground. The floating platform is the first real risk/reward choice: safe and coinless underneath, or a precise jump for 2 coins.
+Introducing speed safely (level 3): the first pad comes on an easy stretch, so the player feels the speed change before it matters. Only after that is speed combined with obstacles. That's exactly "introduce a mechanic in a safe situation first" from your game plan.
+Look-ahead scaling shows you thought about fairness: at higher speed, obstacles arrive faster, so the camera shows more of what's coming.
+The simulation is a strong exam point. It shows you tested systematically: you used the game's own physics numbers to check that the levels are possible, which skills they require, and that coins are reachable, before playtesting with people.

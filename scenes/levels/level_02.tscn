@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://c5pdaumyx0vsr"]
+
+[ext_resource type="Script" uid="uid://bxaqqokfc67mf" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://dmglinqbr8cfg" path="res://scenes/background.tscn" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://d1fpxw8ea38t5" path="res://scenes/platform.tscn" id="3_platform"]
+[ext_resource type="PackedScene" uid="uid://cd0vpgx0b4eea" path="res://scenes/spike.tscn" id="4_spike"]
+[ext_resource type="PackedScene" uid="uid://c7un5gsbshi07" path="res://scenes/coin.tscn" id="5_coin"]
+[ext_resource type="PackedScene" uid="uid://c0cbeknq3bj3o" path="res://scenes/goal.tscn" id="6_goal"]
+[ext_resource type="PackedScene" uid="uid://bw0v5fwcd0d63" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://dg8enhln6lkgo" path="res://scenes/hud.tscn" id="8_hud"]
+
+[node name="Level02" type="Node2D" unique_id=1486790705]
+script = ExtResource("1_level")
+
+[node name="Background" parent="." unique_id=918835265 instance=ExtResource("2_bg")]
+
+[node name="Title" type="Label" parent="." unique_id=1066917238]
+offset_left = 250.0
+offset_top = 150.0
+offset_right = 750.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.102, 0.125, 0.173, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 64
+text = "LEVEL 2"
+
+[node name="Platform1" parent="." unique_id=853284198 instance=ExtResource("3_platform")]
+position = Vector2(0, 400)
+size = Vector2(1100, 200)
+
+[node name="Platform2" parent="." unique_id=1982510055 instance=ExtResource("3_platform")]
+position = Vector2(1240, 340)
+size = Vector2(520, 260)
+
+[node name="Platform3" parent="." unique_id=1817230109 instance=ExtResource("3_platform")]
+position = Vector2(1920, 400)
+size = Vector2(1080, 200)
+
+[node name="Platform4" parent="." unique_id=215001706 instance=ExtResource("3_platform")]
+position = Vector2(2560, 300)
+size = Vector2(160, 30)
+
+[node name="Platform5" parent="." unique_id=1247196038 instance=ExtResource("3_platform")]
+position = Vector2(3150, 400)
+size = Vector2(1000, 200)
+
+[node name="Platform6" parent="." unique_id=1493124413 instance=ExtResource("3_platform")]
+position = Vector2(4290, 400)
+size = Vector2(700, 200)
+
+[node name="Spike1" parent="." unique_id=1372353798 instance=ExtResource("4_spike")]
+position = Vector2(520, 400)
+
+[node name="Spike2" parent="." unique_id=735230318 instance=ExtResource("4_spike")]
+position = Vector2(800, 400)
+
+[node name="Spike3" parent="." unique_id=1053679243 instance=ExtResource("4_spike")]
+position = Vector2(1500, 340)
+
+[node name="Spike4" parent="." unique_id=1931993498 instance=ExtResource("4_spike")]
+position = Vector2(2200, 400)
+
+[node name="Spike5" parent="." unique_id=1164908933 instance=ExtResource("4_spike")]
+position = Vector2(2240, 400)
+
+[node name="Spike6" parent="." unique_id=566829136 instance=ExtResource("4_spike")]
+position = Vector2(2280, 400)
+
+[node name="Spike7" parent="." unique_id=400333295 instance=ExtResource("4_spike")]
+position = Vector2(3380, 400)
+
+[node name="Spike8" parent="." unique_id=1321680453 instance=ExtResource("4_spike")]
+position = Vector2(3700, 400)
+
+[node name="Spike9" parent="." unique_id=1311944034 instance=ExtResource("4_spike")]
+position = Vector2(3740, 400)
+
+[node name="Coin1" parent="." unique_id=2004689008 instance=ExtResource("5_coin")]
+position = Vector2(1500, 205)
+
+[node name="Coin2" parent="." unique_id=1974260716 instance=ExtResource("5_coin")]
+position = Vector2(2240, 250)
+
+[node name="Coin3" parent="." unique_id=1274201279 instance=ExtResource("5_coin")]
+position = Vector2(2600, 270)
+
+[node name="Coin4" parent="." unique_id=151916697 instance=ExtResource("5_coin")]
+position = Vector2(2680, 270)
+
+[node name="Coin5" parent="." unique_id=973382562 instance=ExtResource("5_coin")]
+position = Vector2(4220, 280)
+
+[node name="Goal" parent="." unique_id=757805869 instance=ExtResource("6_goal")]
+position = Vector2(5000, 400)
+
+[node name="Player" parent="." unique_id=1388772720 instance=ExtResource("7_player")]
+position = Vector2(100, 350)
+
+[node name="HUD" parent="." unique_id=154213080 instance=ExtResource("8_hud")]

@@ -89,6 +89,16 @@ for f, d in [(523, 0.1), (659, 0.1), (784, 0.1), (1047, 0.45)]:
     parts.append(tone * np.exp(-t * 3) * envelope(len(t), 0.003, 0.03))
 save("goal.wav", np.concatenate(parts), 0.65)
 
+# --- Speed boost: rising whoosh (noise) + rising tone ----------------------
+t = t_axis(0.4)
+noise = rng.uniform(-1, 1, len(t))
+# crude band-pass: smooth the noise, more as time goes on = "whoosh"
+smooth = np.convolve(noise, np.ones(6) / 6, mode="same")
+whoosh = smooth * np.sin(np.pi * t / 0.4)
+freq = np.linspace(300, 1000, len(t))
+tone = square(phase_from_freq(freq), 0.25) * np.exp(-t * 3)
+save("boost.wav", (whoosh * 0.8 + tone * 0.35) * envelope(len(t), 0.01, 0.08), 0.65)
+
 # --- Music: 16-bar chiptune loop (Am - F - C - G), 150 BPM ---------------
 BPM = 150
 beat = 60 / BPM
