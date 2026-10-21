@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="One Button Hell"
-run/main_scene="uid://cc7ioc2lmanhd"
+run/main_scene="uid://b62jp7e5214nq"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

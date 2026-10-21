@@ -8,6 +8,7 @@ const GOLD := Color("f6c945")
 const DARK := Color("1a202c")
 const CARD := Color("2d3748")
 const SOFT := Color("cbd5e0")
+const LOCKED := Color("4a5568")
 
 
 static func box_style(color: Color, radius: int = 14, border: Color = DARK) -> StyleBoxFlat:
@@ -24,11 +25,14 @@ static func make_button(text: String, on_pressed: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.custom_minimum_size = Vector2(280, 58)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	b.add_theme_font_size_override("font_size", 26)
 	b.add_theme_color_override("font_color", Color.WHITE)
+	b.add_theme_color_override("font_disabled_color", SOFT.darkened(0.3))
 	b.add_theme_stylebox_override("normal", box_style(PURPLE))
 	b.add_theme_stylebox_override("hover", box_style(PURPLE.lightened(0.15)))
 	b.add_theme_stylebox_override("pressed", box_style(PURPLE.darkened(0.2)))
+	b.add_theme_stylebox_override("disabled", box_style(LOCKED))
 	# The selected button gets a white border, so keyboard players see it.
 	b.add_theme_stylebox_override("focus", box_style(Color(0, 0, 0, 0), 14, Color.WHITE))
 	b.pressed.connect(on_pressed)
@@ -44,6 +48,13 @@ static func make_label(text: String, size: int, color: Color = Color.WHITE) -> L
 	l.add_theme_constant_override("outline_size", 8)
 	l.add_theme_color_override("font_outline_color", DARK)
 	return l
+
+
+# Empty space between items in a vertical list.
+static func make_spacer(height: float) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(0, height)
+	return c
 
 
 # Semi-transparent black over the game, so the menu stands out.
