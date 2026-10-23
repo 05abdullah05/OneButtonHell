@@ -12,8 +12,11 @@ extends CharacterBody2D
 @export var pit_y: float = 480.0              # below this = falling into a pit (sound starts)
 @export var death_pause: float = 0.55         # seconds before restarting after death
 @export var finish_brake: float = 900.0       # how fast the player stops at the goal
+@export var air_jumps: int = 0                # extra jumps in mid-air (1 = double jump), set by the level
+@export var air_jump_strength: float = 1.0    # air jump as strong as the ground jump
 
 const DUST := [Color("eee8d5"), Color("cfc6ab"), Color("8fd16f")]
+const FEATHERS := [Color("ffffff"), Color("e9d8fd"), Color("d6bcfa")]
 const FEET := Vector2(0, 30)                  # offset from center to the feet
 
 @onready var visual: PlayerVisual = $Visual
@@ -25,6 +28,8 @@ var is_dead: bool = false
 var is_finished: bool = false
 var was_on_floor: bool = true
 var is_falling_in_pit: bool = false
+var air_jumps_left: int = 0
+var can_cut_jump: bool = false   # only the GROUND jump can be cut short by releasing
 
 
 func _ready() -> void:
@@ -46,6 +51,7 @@ func _physics_process(delta: float) -> void:
 	# 2. Gravity + coyote time.
 	if is_on_floor():
 		coyote_timer = coyote_time
+		air_jumps_left = air_jumps      # landing refills the air jump
 	else:
 		coyote_timer -= delta
 		velocity.y += gravity * delta
@@ -72,6 +78,7 @@ func _physics_process(delta: float) -> void:
 
 	# 8. Tell the visual which pose to show.
 	visual.set_state(on_floor_now, velocity.y, absf(velocity.x) > 20.0)
+	visual.has_air_jump = air_jumps_left > 0   # wings = "you can still jump in the air"
 
 	# 9. Falling into a pit: whistle down and fade the music, like dropping in a well.
 	if not is_falling_in_pit and global_position.y > pit_y:
@@ -91,9 +98,13 @@ func _physics_process(delta: float) -> void:
 
 
 func _handle_jump(delta: float) -> void:
-	# Jump buffer: remember a press for a short moment.
+	# A press in mid-air (after coyote time) uses an air jump if one is left.
+	# Otherwise the press is buffered for the next ground jump.
 	if Input.is_action_just_pressed("jump"):
-		jump_buffer_timer = jump_buffer_time
+		if coyote_timer <= 0.0 and air_jumps_left > 0:
+			_air_jump()
+		else:
+			jump_buffer_timer = jump_buffer_time
 	else:
 		jump_buffer_timer -= delta
 
@@ -102,14 +113,36 @@ func _handle_jump(delta: float) -> void:
 		velocity.y = jump_velocity
 		jump_buffer_timer = 0.0
 		coyote_timer = 0.0
+		can_cut_jump = true
 		visual.squash(Vector2(0.7, 1.3))   # stretch tall when taking off
 		FX.burst(_level(), global_position + FEET, PackedColorArray(DUST),
 				6, 110.0, Vector2.UP, 70.0, 5.0, 0.35, 300.0)
 		Audio.play("jump", -6.0, 0.08)
 
 	# Variable jump height: letting go early cuts the upward speed.
-	if Input.is_action_just_released("jump") and velocity.y < 0.0:
+	# Only for the ground jump: the air jump always goes full height, because
+	# players naturally double-TAP, and a cut air jump was too weak (playtest).
+	if Input.is_action_just_released("jump") and velocity.y < 0.0 and can_cut_jump:
 		velocity.y *= jump_cut_multiplier
+		can_cut_jump = false
+
+
+func _air_jump() -> void:
+	velocity.y = jump_velocity * air_jump_strength
+	air_jumps_left -= 1
+	jump_buffer_timer = 0.0
+	can_cut_jump = false
+	visual.squash(Vector2(0.75, 1.25))
+	# The wings "burst" into feathers: the ability is used up until landing.
+	FX.burst(_level(), global_position + Vector2(-8, -10), PackedColorArray(FEATHERS),
+			12, 160.0, Vector2.DOWN, 70.0, 6.0, 0.5, 200.0)
+	Audio.play("double_jump", -5.0, 0.04)
+
+
+# Called by the level (level.gd): 1 = double jump available.
+func set_air_jumps(amount: int) -> void:
+	air_jumps = amount
+	air_jumps_left = amount
 
 
 # Called by speed pads. The camera looks further ahead at higher speed,

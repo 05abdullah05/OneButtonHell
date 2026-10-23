@@ -99,6 +99,23 @@ freq = np.linspace(300, 1000, len(t))
 tone = square(phase_from_freq(freq), 0.25) * np.exp(-t * 3)
 save("boost.wav", (whoosh * 0.8 + tone * 0.35) * envelope(len(t), 0.01, 0.08), 0.65)
 
+# --- Double jump: bright two-note "ba-ding" with a little upward glide ----
+parts = []
+for f0, f1, d in [(784, 820, 0.05), (1175, 1320, 0.16)]:
+    t = t_axis(d)
+    freq = np.linspace(f0, f1, len(t))
+    tone = triangle(phase_from_freq(freq)) * 0.7 + square(phase_from_freq(freq), 0.125) * 0.3
+    parts.append(tone * np.exp(-t * 10) * envelope(len(t), 0.002, 0.02))
+sparkle = rng.uniform(-1, 1, sum(len(p) for p in parts)) * 0.06
+save("double_jump.wav", np.concatenate(parts) + sparkle, 0.55)
+
+# --- Crumble: low rumble with crackles ------------------------------------
+t = t_axis(0.5)
+noise = rng.uniform(-1, 1, len(t))
+rumble = np.convolve(noise, np.ones(25) / 25, mode="same") * 3.0     # low, muffled
+clicks = (rng.uniform(0, 1, len(t)) > 0.985) * rng.uniform(-1, 1, len(t))
+save("crumble.wav", (rumble + clicks * 0.6) * np.exp(-t * 3) * envelope(len(t), 0.01, 0.1), 0.6)
+
 # --- Music: 16-bar chiptune loop (Am - F - C - G), 150 BPM ---------------
 BPM = 150
 beat = 60 / BPM

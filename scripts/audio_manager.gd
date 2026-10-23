@@ -11,6 +11,8 @@ const SOUNDS := {
 	"coin": preload("res://audio/coin.wav"),
 	"goal": preload("res://audio/goal.wav"),
 	"boost": preload("res://audio/boost.wav"),
+	"double_jump": preload("res://audio/double_jump.wav"),
+	"crumble": preload("res://audio/crumble.wav"),
 }
 const MUSIC := preload("res://audio/music.wav")
 const POOL_SIZE := 8              # up to 8 sound effects can overlap

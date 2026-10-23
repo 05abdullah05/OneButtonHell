@@ -18,6 +18,7 @@ var on_floor: bool = true
 var vertical_speed: float = 0.0
 var moving: bool = true
 var celebrating: bool = false
+var has_air_jump: bool = false     # draw wings when an air jump is available
 var run_time: float = 0.0
 
 
@@ -87,6 +88,13 @@ func _draw() -> void:
 
 	var b := Vector2(0, bob)
 
+	# Wings on the back (behind everything), only while an air jump is left.
+	if has_air_jump:
+		# Slow flutter on the ground, fast flapping in the air.
+		var flap := sin(run_time * (0.5 if on_floor else 1.6)) * 0.25
+		_wing(Vector2(-6, -33) + b, flap + 0.15, Color("e9d8fd"))   # back wing, darker
+		_wing(Vector2(-9, -31) + b, flap, Color.WHITE)             # front wing
+
 	# Legs + shoes
 	_limb(hip_l + b, foot_l, pants_color, 7.0)
 	_limb(hip_r + b, foot_r, pants_color, 7.0)
@@ -126,6 +134,20 @@ func _draw() -> void:
 		draw_circle(head + Vector2(6, 8), 2.2, OUTLINE)
 	else:
 		draw_line(head + Vector2(3, 8), head + Vector2(8, 7), OUTLINE, 1.5)
+
+
+# A simple feathered wing pointing up and back from the shoulder.
+func _wing(root: Vector2, angle: float, color: Color) -> void:
+	var pts := PackedVector2Array([
+		Vector2(0, 0), Vector2(-6, -12), Vector2(-20, -18), Vector2(-24, -10),
+		Vector2(-20, -4), Vector2(-14, 0),
+	])
+	for i in pts.size():
+		pts[i] = root + pts[i].rotated(angle)
+	draw_colored_polygon(pts, color)
+	var outline := pts.duplicate()
+	outline.append(pts[0])
+	draw_polyline(outline, OUTLINE, 2.0)
 
 
 # Draws an arm or leg: dark outline first, then the colored limb on top.

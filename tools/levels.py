@@ -18,3 +18,21 @@ L3 = dict(
     pads=[(650,380.0),(2250,450.0)],
     goal=4900,
 )
+
+L4 = dict(
+    title="LEVEL 4",
+    double_jump=True,
+    platforms=[(0,400,1300,200),          # P1 discovery zone
+               (1640,400,780,200),         # P2 after the too-wide gap (340), runs up to the ledge
+               (2420,260,580,340),         # P3 ledge 140 higher, no gap (needs double jump)
+               (3150,400,750,200),         # P4 drop back down
+               (4300,400,900,200),         # P5 after a 400 gap
+               (4750,220,150,30),          # F  high floating platform (risky coins)
+               (5350,300,350,300),         # P6 stair 1 (100 up)
+               (5850,180,550,420)],        # P7 stair 2 (120 up) with the goal
+    spikes=[(1000,400),(2750,260),(3500,400),(3540,400),(4560,400),(5520,300)],
+    coins=[(620,190),(700,170),(780,190),(4100,180),(4790,190),(4860,190)],
+    pads=[],
+    goal=6250,
+    goal_y=180,
+)

@@ -12,6 +12,8 @@ const LEVELS: Array[String] = [
 	"res://scenes/levels/level_01.tscn",
 	"res://scenes/levels/level_02.tscn",
 	"res://scenes/levels/level_03.tscn",
+	"res://scenes/levels/level_04.tscn",
+	"res://scenes/levels/level_05.tscn",
 ]
 const MAIN_MENU := "res://scenes/ui/main_menu.tscn"
 # user:// is a folder Godot creates for each game on the player's computer.

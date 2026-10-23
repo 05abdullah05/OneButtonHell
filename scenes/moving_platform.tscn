@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://c5m8igm5vasqn"]
+
+[ext_resource type="Script" uid="uid://co72raeqhm6pg" path="res://scripts/moving_platform.gd" id="1_move"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ms375"]
+size = Vector2(160, 24)
+
+[node name="MovingPlatform" type="AnimatableBody2D" unique_id=698758438]
+script = ExtResource("1_move")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1217411669]
+position = Vector2(80, 12)
+shape = SubResource("RectangleShape2D_ms375")

@@ -242,3 +242,76 @@ Design reasoning for level 2: each section tests one idea from level 1 in a hard
 Introducing speed safely (level 3): the first pad comes on an easy stretch, so the player feels the speed change before it matters. Only after that is speed combined with obstacles. That's exactly "introduce a mechanic in a safe situation first" from your game plan.
 Look-ahead scaling shows you thought about fairness: at higher speed, obstacles arrive faster, so the camera shows more of what's coming.
 The simulation is a strong exam point. It shows you tested systematically: you used the game's own physics numbers to check that the levels are possible, which skills they require, and that coins are reachable, before playtesting with people.
+
+
+
+### Double jump + level 4 (21/10, done 22/10)
+- Air jump: a press in mid-air (after coyote time) uses an air jump if
+  one is left; otherwise it is buffered for the ground. Landing refills
+  it. Air jump is 0.9x ground strength; variable height still works.
+- Turned on per level (level.gd: double_jump = true) from level 4, and
+  stays on for later levels: a learned mechanic keeps being used.
+- Teaching without text:
+  - Wings on the character = "you have an air jump". They burst into
+    feathers when used and come back on landing (shows the resource).
+  - Own sound ("ba-ding") so the second jump is heard as different.
+  - Level opens with a safe discovery zone: coins only reachable with a
+    double jump, no danger.
+- Level 4 "Wings" (longer, ~6400 px): too-wide gap, too-high ledge, wide
+  gap + spike on landing, high floating platform with 2 coins (risk),
+  staircase finale to a goal on a high platform.
+- Validated with tools/sim2.py: finishable WITH double jump, impossible
+  WITHOUT it (mechanic is required), all 6 coins reachable in one run,
+  discovery coins need the double jump.
+
+
+### Playtest fix: double jump too hard (done on 23/10 but work for 21/10)
+- Playtest: 32 deaths at level 4's high ledge, right after the double
+  jump is introduced = difficulty spike in the wrong place.
+- Diagnosis with the simulation (tools/ledge2.py): players instinctively
+  double-TAP. The air jump was cut short on release like the ground
+  jump, so with quick taps the ledge had 0 working timings.
+- Fixes:
+  - Air jump always full height (can't be cut). Variable height stays
+    on the ground jump, where it is a skill element.
+  - Air jump strength 0.9 -> 1.0.
+  - Ledge 160 -> 140 px and no gap in front (miss = wall bonk, not a fall).
+- Result: quick double-tap 0 -> 588 working timings, held presses
+  783 -> ~1300. Level still impossible without the double jump, all
+  coins still collectable, now finishable with quick taps only.
+- Rejected idea: glide on hold. Holding already means "jump higher",
+  so a glide would give the one button two meanings in the air.
+
+For the exam
+Showing resources visually: the wings are a resource indicator built into the character. You never need a UI counter, because the player sees at a glance whether a jump is left. That's teaching through visuals in its purest form.
+Discover, then require: the discovery zone lets the player experiment with no risk, and only then does the level require the double jump to progress. That's the "introduce safely, then challenge" pattern from your game plan, and the simulation proves the requirement is real.
+Input design: deciding whether a mid-air press is an air jump or a buffered ground jump depends on whether the player is still within coyote time. That's a deliberate choice that keeps both earlier game-feel features working with the new mechanic.
+
+
+### Moving + crumbling platforms, level 5 (22/10, done 23/10)
+- Moving platform: AnimatableBody2D moved in _physics_process, carries
+  the player. Smooth back-and-forth with cosine easing (slows at the
+  ends, so turning points are readable). Draws a dotted track of its
+  full path = the player can predict it before arriving.
+- Crumbling platform: thin Trigger area on top; standing on it ->
+  shakes + rumble sound for 0.5 s -> breaks into debris (collision off),
+  faint outline remains, comes back after 3 s. Timers pause with the
+  game.
+- Own visual language: wood = moves, cracked sandstone = breaks. No
+  other object uses these colors.
+- Auto-runner insight: the player always reaches a given x at the same
+  time, so moving platforms are in the same spot every attempt = a
+  learnable pattern, never random. Vertical movement only, because
+  riding a horizontal mover would shift that timing.
+- Level 5 "Moving Parts": safe crumble intro above solid ground (falling
+  is harmless), bobbing steps over a pit, elevator to a ledge 250 px up
+  (beyond the double jump), crumbling bridge, final bobber.
+- Validated per section with tools/sim3.py (moving + crumbling physics):
+  timings scanned, elevator and bridge required (can't be skipped), all
+  coins reachable, intro safe to ignore.
+
+
+  For the exam
+Readable motion: the dotted track and the cosine easing (slowing down at the ends) make every moving platform predictable. Players fail because of their own timing, not because something surprised them, which is what makes difficulty feel fair.
+Safe introduction, again: crumbling platforms first appear above solid ground, so the first experience of one breaking costs nothing. Only later does a crumbling bridge sit over a pit. It's the same pattern as the double jump's discovery zone, and you can point out that you applied it consistently.
+Determinism in auto-runners is a thoughtful design observation. It explains why you chose vertical movement and why the levels are learnable through repetition, which ties into the skill criterion: experienced players learn the patterns and go faster through them.
