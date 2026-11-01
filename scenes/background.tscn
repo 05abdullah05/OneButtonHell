@@ -57,8 +57,7 @@ bumps = 14
 lumpy = true
 
 [node name="Void" type="Parallax2D" parent="." unique_id=2075501903]
-scroll_scale = Vector2(0.1, 1)
 
 [node name="Polygon2D" type="Polygon2D" parent="Void" unique_id=1337331344]
 color = Color(0.101960786, 0.14117648, 0.2, 1)
-polygon = PackedVector2Array(-200, 440, 1400, 440, 1400, 3000, -200, 3000)
+polygon = PackedVector2Array(-3000, 440, 30000, 440, 30000, 3000, -3000, 3000)

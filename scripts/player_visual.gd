@@ -19,6 +19,7 @@ var vertical_speed: float = 0.0
 var moving: bool = true
 var celebrating: bool = false
 var has_air_jump: bool = false     # draw wings when an air jump is available
+var facing: float = 1.0            # 1 = facing right, -1 = facing left (mirrored)
 var run_time: float = 0.0
 
 
@@ -26,7 +27,9 @@ func _process(delta: float) -> void:
 	run_time += delta * run_cycle_speed
 	# Ease the scale back to normal after a squash/stretch.
 	# 1 - exp(-k * delta) makes the easing the same at any frame rate.
-	scale = scale.lerp(Vector2.ONE, 1.0 - exp(-12.0 * delta))
+	# Facing left = scale.x of -1 (mirror image). Easing toward it also gives
+	# a quick "squeeze and flip" animation when the player turns around.
+	scale = scale.lerp(Vector2(facing, 1.0), 1.0 - exp(-12.0 * delta))
 	queue_redraw()
 
 
@@ -39,7 +42,7 @@ func set_state(floor_now: bool, vy: float, is_moving: bool = true) -> void:
 
 # Instantly deform; _process eases it back to normal.
 func squash(target_scale: Vector2) -> void:
-	scale = target_scale
+	scale = Vector2(target_scale.x * facing, target_scale.y)
 
 
 func _draw() -> void:

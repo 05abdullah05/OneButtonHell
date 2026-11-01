@@ -11,6 +11,9 @@ var reset_armed: bool = false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Back from a sunset/night level: restore the daytime sky.
+	RenderingServer.set_default_clear_color(
+			ProjectSettings.get_setting("rendering/environment/defaults/default_clear_color"))
 	show_main()
 
 

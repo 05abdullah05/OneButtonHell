@@ -1,0 +1,145 @@
+[gd_scene format=3 uid="uid://dl545sj0mm57x"]
+
+[ext_resource type="Script" uid="uid://bxaqqokfc67mf" path="res://scripts/level.gd" id="1_level"]
+[ext_resource type="PackedScene" uid="uid://dmglinqbr8cfg" path="res://scenes/background.tscn" id="2_bg"]
+[ext_resource type="PackedScene" uid="uid://d1fpxw8ea38t5" path="res://scenes/platform.tscn" id="3_platform"]
+[ext_resource type="PackedScene" uid="uid://cd0vpgx0b4eea" path="res://scenes/spike.tscn" id="4_spike"]
+[ext_resource type="PackedScene" uid="uid://c7un5gsbshi07" path="res://scenes/coin.tscn" id="5_coin"]
+[ext_resource type="PackedScene" uid="uid://c0cbeknq3bj3o" path="res://scenes/goal.tscn" id="6_goal"]
+[ext_resource type="PackedScene" uid="uid://bw0v5fwcd0d63" path="res://scenes/player.tscn" id="7_player"]
+[ext_resource type="PackedScene" uid="uid://dg8enhln6lkgo" path="res://scenes/hud.tscn" id="8_hud"]
+[ext_resource type="PackedScene" uid="uid://c5m8igm5vasqn" path="res://scenes/moving_platform.tscn" id="9_mover"]
+[ext_resource type="PackedScene" path="res://scenes/crumble_platform.tscn" id="10_crumble"]
+[ext_resource type="PackedScene" uid="uid://b0gkcx4bulpj8" path="res://scenes/turn_pad.tscn" id="11_turn"]
+
+[node name="Level06" type="Node2D" unique_id=1172612080]
+script = ExtResource("1_level")
+double_jump = true
+path_length = 8180.0
+palette = 2
+
+[node name="Background" parent="." unique_id=213724092 instance=ExtResource("2_bg")]
+
+[node name="Title" type="Label" parent="." unique_id=588616138]
+offset_left = 250.0
+offset_top = 150.0
+offset_right = 850.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.102, 0.125, 0.173, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 64
+text = "LEVEL 6"
+
+[node name="Platform1" parent="." unique_id=209522921 instance=ExtResource("3_platform")]
+position = Vector2(0, 400)
+size = Vector2(900, 200)
+
+[node name="Platform2" parent="." unique_id=1261317392 instance=ExtResource("3_platform")]
+position = Vector2(1650, 400)
+size = Vector2(600, 200)
+
+[node name="Platform3" parent="." unique_id=388126494 instance=ExtResource("3_platform")]
+position = Vector2(2900, 400)
+size = Vector2(500, 200)
+
+[node name="TowerFloor" parent="." unique_id=1345113481 instance=ExtResource("3_platform")]
+position = Vector2(3600, 400)
+size = Vector2(1100, 200)
+
+[node name="LedgeA" parent="." unique_id=1562338535 instance=ExtResource("3_platform")]
+position = Vector2(3700, 260)
+size = Vector2(560, 24)
+
+[node name="LedgeB" parent="." unique_id=2138229109 instance=ExtResource("3_platform")]
+position = Vector2(4120, 120)
+size = Vector2(560, 24)
+
+[node name="LedgeC" parent="." unique_id=304038527 instance=ExtResource("3_platform")]
+position = Vector2(3700, -20)
+size = Vector2(560, 24)
+
+[node name="LedgeD" parent="." unique_id=1719265229 instance=ExtResource("3_platform")]
+position = Vector2(4120, -160)
+size = Vector2(680, 24)
+
+[node name="Crumble1" parent="." unique_id=2017046034 instance=ExtResource("10_crumble")]
+position = Vector2(1000, 330)
+size = Vector2(120, 24)
+
+[node name="Crumble2" parent="." unique_id=859349670 instance=ExtResource("10_crumble")]
+position = Vector2(1200, 300)
+size = Vector2(120, 24)
+
+[node name="Crumble3" parent="." unique_id=929503047 instance=ExtResource("10_crumble")]
+position = Vector2(1400, 270)
+size = Vector2(120, 24)
+
+[node name="Mover1" parent="." unique_id=80542487 instance=ExtResource("9_mover")]
+position = Vector2(2450, 380)
+size = Vector2(150, 24)
+travel = Vector2(0, -150)
+duration = 1.0
+phase = 0.3
+
+[node name="TurnPad1" parent="." unique_id=563098519 instance=ExtResource("11_turn")]
+position = Vector2(4650, 400)
+
+[node name="TurnPad2" parent="." unique_id=1214886843 instance=ExtResource("11_turn")]
+position = Vector2(3620, 400)
+direction = 1
+
+[node name="TurnPad3" parent="." unique_id=1178156012 instance=ExtResource("11_turn")]
+position = Vector2(3730, 260)
+direction = 1
+
+[node name="TurnPad4" parent="." unique_id=2096044016 instance=ExtResource("11_turn")]
+position = Vector2(4650, 120)
+
+[node name="TurnPad5" parent="." unique_id=1427469125 instance=ExtResource("11_turn")]
+position = Vector2(3730, -20)
+direction = 1
+
+[node name="Spike1" parent="." unique_id=1496160264 instance=ExtResource("4_spike")]
+position = Vector2(450, 400)
+
+[node name="Spike2" parent="." unique_id=1711116461 instance=ExtResource("4_spike")]
+position = Vector2(490, 400)
+
+[node name="Spike3" parent="." unique_id=1077286936 instance=ExtResource("4_spike")]
+position = Vector2(1950, 400)
+
+[node name="Spike4" parent="." unique_id=380256404 instance=ExtResource("4_spike")]
+position = Vector2(3150, 400)
+
+[node name="Spike5" parent="." unique_id=323849693 instance=ExtResource("4_spike")]
+position = Vector2(3190, 400)
+
+[node name="Spike6" parent="." unique_id=680636311 instance=ExtResource("4_spike")]
+position = Vector2(3230, 400)
+
+[node name="Coin1" parent="." unique_id=1467309553 instance=ExtResource("5_coin")]
+position = Vector2(470, 250)
+
+[node name="Coin2" parent="." unique_id=1028295830 instance=ExtResource("5_coin")]
+position = Vector2(1460, 230)
+
+[node name="Coin3" parent="." unique_id=306230742 instance=ExtResource("5_coin")]
+position = Vector2(2525, 230)
+
+[node name="Coin4" parent="." unique_id=875272117 instance=ExtResource("5_coin")]
+position = Vector2(3190, 250)
+
+[node name="Coin5" parent="." unique_id=343426101 instance=ExtResource("5_coin")]
+position = Vector2(4400, 90)
+
+[node name="Coin6" parent="." unique_id=992302778 instance=ExtResource("5_coin")]
+position = Vector2(3950, -50)
+
+[node name="Goal" parent="." unique_id=1592605821 instance=ExtResource("6_goal")]
+position = Vector2(4600, -160)
+
+[node name="Player" parent="." unique_id=1868295605 instance=ExtResource("7_player")]
+position = Vector2(100, 350)
+
+[node name="HUD" parent="." unique_id=282258446 instance=ExtResource("8_hud")]

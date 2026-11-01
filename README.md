@@ -1,317 +1,125 @@
+## Download & play
+
+Get the Windows version from the [Releases page](../../releases): download the zip, unzip it and run `OneButtonHell.exe`.
+Gameplay videos: [Teaser](https://youtu.be/fpKyru0xjNk?si=1zNDyEc_R5KOmLH-) · [Full playthrough](https://youtu.be/nFVydSco_tc?si=FMFr4dqnl1RGBJ7y)
+
 # One Button Hell
 
-2D auto-runner made in Godot 4.7 (GDScript) for TDDD23.
-The player runs automatically; the only input is jump (Space / left mouse button).
+A 2D one-button auto-runner made in **Godot 4.7.2 (GDScript)** for TDDD23 Game Development, Linköping University, 2026.
 
-## Dev log
+The character runs on its own. The only input is **jump** (Space / left mouse button).
+Seven short levels introduce one idea at a time and then combine them.
 
-### Setup (30/9 – 7/10)
-- Godot project + private GitHub repo.
-- Player: CharacterBody2D with auto-run, gravity and jump.
-- Game-feel techniques for "controls work flawlessly":
-  - Coyote time (0.1 s): can still jump just after leaving a ledge.
-  - Jump buffering (0.1 s): a slightly early press still counts on landing.
-  - Variable jump height: releasing early cuts the jump short = skill element.
-- Jump physics: ~117 px high, ~217 px long at 300 px/s. Gap and spike
-  sizes in levels are designed from these numbers.
-- Input Map action "jump" instead of hard-coded keys.
+**Controls:** Space / Left click = jump (hold for a higher jump) · Esc / P = pause · Menus: Space/Enter presses the selected button, Esc = back.
 
-### Architecture + Level 1 (5/10 – 7/10)
-- Reusable scenes: Player, Platform, Spike, Goal. Levels are built by
-  placing instances.
-- Platform uses a @tool script: Size is set in the Inspector and each
-  platform creates its OWN collision shape (avoids Godot's shared-resource
-  trap when duplicating).
-- Spike/Goal are Area2D using the body_entered signal (observer pattern);
-  `class_name Player` so they only react to the player.
-- Spike hitbox is smaller than its visual = forgiving, fair deaths.
-- Death = instant restart (reload_current_scene via call_deferred, because
-  physics objects must not be removed mid physics step).
-- Level 1 teaches without text: first spike is visible from the start with
-  ~2 s of runway, then one new idea at a time (gap, double spike, wider gap).
-- Color language: red = danger, green = goal, neutral stone = safe ground.
+---
 
-### Seminar (8/10)
-- Presented level 1, controls design and roadmap.
+## Core design
 
-### Art: background + visuals (13/10)
-- All art drawn in code with _draw() (@tool so it shows in the editor).
-- Platforms: stone bricks (rows offset half a brick) + grass top.
-- Spikes: shaded triangle (light left, dark right) for a 3D feel.
-- Parallax background (Parallax2D), 4 layers in a reusable Background scene:
-  - Clouds: scroll 0.1 + slow autoscroll so the world feels alive.
-  - Far hills: scroll 0.2, pale blue (atmospheric perspective = depth).
-  - Bushes: scroll 0.5, dark green.
-  - Void: dark area below ground, so gaps read as deadly pits without text.
-- Hills are generated with sine waves that fit a whole number of times into
-  the layer width, so the repeating layer has no visible seam.
-- Draw order = tree order: Background must be first child of the level.
-- Camera2D vertical drag margins: the camera ignores normal jumps, so the
-  view doesn't bounce every time the player jumps.
-- Bug found: two Background instances, one drawn in front of everything.
-  Fixed by removing the duplicate.
+> One simple control, increasingly complex decisions.
 
+- **Easy to pick up:** level 1 teaches jumping without any text. The first spike is visible from the start with about 2 seconds of runway, so the player has time to try the only button there is.
+- **Skill:** tap = small hop, hold = full jump. Coins are placed on risky routes and reset on death, so collecting all of them requires one clean run. The complete screen shows coins, deaths and best result.
+- **Progression:** every level adds one new idea in a safe situation first, then requires it, then combines it with earlier ideas. Each pair of levels has its own time of day (day → sunset → dusk → night).
 
+## Levels
 
+| # | Name | Palette | New idea | How it is taught |
+|---|------|---------|----------|------------------|
+| 1 | Basics | Day | Run, jump, spikes, gaps, coins | First spike visible from the start; first coin is free |
+| 2 | Patterns | Day | Spike rhythm, step-up, triple spike, risk route | Floating platform with 2 coins above a safe path |
+| 3 | Faster | Sunset | Speed pads 300 → 380 → 450 | First pad on an easy stretch; camera looks further ahead at higher speed |
+| 4 | Wings | Sunset | Double jump | Safe discovery zone (coins only a double jump reaches), then gaps and ledges that require it |
+| 5 | Moving Parts | Dusk | Moving and crumbling platforms | Crumbling platforms first appear above solid ground (falling is harmless) |
+| 6 | Turnaround | Dusk | Turn arrows, zig-zag tower climb | Combines all earlier mechanics, then turns around and climbs |
+| 7 | Final Level | Night | Everything at higher speed | Speed 380, tower slowed to 320 so the climb stays fair |
 
-  ### Character + squash & stretch (14/10)
-- Player visual drawn in code (PlayerVisual, @tool): head, hair, face,
-  shirt, arms, legs, with a dark outline so it reads on every background.
-- Purple shirt: not red (danger) or green (goal), and stands out against
-  sky, bushes and stone.
-- Three poses chosen from physics state: run cycle (sin/cos for legs and
-  arms, opposite phase), rising (tucked), falling (arms out, legs down).
-- Eyes look in the running direction; mouth opens in the air.
-- Squash & stretch: stretch (0.7, 1.3) on takeoff, squash on landing
-  scaled by fall speed (bigger fall = bigger squash).
-- Visual origin at the feet, so scaling keeps the feet on the ground.
-- Scale eases back with lerp using 1 - exp(-k * delta) =
-  frame-rate independent smoothing.
-- Separation: Player (physics/logic) tells PlayerVisual (drawing) what
-  happens via set_state() and squash(). Logic and visuals stay separate.
-- Hitbox shrunk to 24x56 to match the narrower character (fair deaths).
+## Visual language (teaching without text)
 
+| Color / look | Meaning | Used only for |
+|---|---|---|
+| Red | Danger | Spikes |
+| Gold | Reward | Coins |
+| Green | Finish | Goal flag |
+| Cyan chevrons | Speed change | Speed pads |
+| Orange arrows | Turn around | Turn arrows |
+| Wood + dotted track | Moves (path shown in advance) | Moving platforms |
+| Cracked sandstone | Breaks when you stand on it | Crumbling platforms |
+| Wings on the character | An air jump is available | Double jump |
+| Dark void | Falling here kills you | Pits |
 
-For the exam
-Squash and stretch is one of the classic animation principles. It makes motion feel elastic and gives every jump and landing physical weight without any extra mechanic. It's feedback the player feels rather than reads.
-Separating logic from visuals means player.gd only handles physics and rules, while PlayerVisual only handles drawing. You could swap the art for a sprite later without touching the movement code.
-The fall_speed detail shows careful debugging: move_and_slide() sets velocity.y to 0 on landing, so the speed has to be saved before the call.
+Palettes change the sky and background, never these meanings.
 
+## Feedback ("juice")
 
+- **Squash & stretch** on jump and landing; landing squash scales with fall speed.
+- **Dust** on jump/landing, **feathers** on double jump, **sparkles** on coins, **debris** from crumbling platforms, **confetti** at the goal.
+- **Death:** the character bursts into pieces in its own colors, screen shake, **hit-stop** (0.08 s near-freeze), then a fast restart (0.55 s).
+- **Sound:** distinct sounds for jump, double jump, coin, spike death, pit fall (slide whistle while the music fades out), speed pad, turn, crumble and goal, plus a chiptune music loop.
+- **HUD:** coin counter that pops on pickup, death counter, and a progress bar toward a flag.
 
+## Game feel (controls)
 
+- **Coyote time (0.1 s):** you can still jump just after leaving a ledge.
+- **Jump buffering (0.1 s):** a press slightly before landing still counts.
+- **Variable jump height:** releasing early cuts the ground jump short.
+- **Air jump always full height:** playtesting showed players double-*tap*; a cut air jump made a ledge impossible with taps.
+- **Forgiving hitboxes:** spikes have smaller hitboxes than their drawing, coins bigger.
+- **Camera:** vertical drag margins (normal jumps don't move the camera), look-ahead that grows with speed and swings around when the player turns.
 
-### Juice / feedback (15/10)
-- FX helper (static function) spawns one-shot CPUParticles2D bursts in
-  code: random colors per particle, shrink over lifetime, auto-deleted
-  when finished (no memory build-up).
-- Dust on jump and landing; landing dust scales with fall speed.
-- Death: character bursts into pieces in its own colors + screen shake.
-- Hit-stop: Engine.time_scale = 0.05 for 0.08 s at death so the hit
-  "lands". The timer ignores time_scale, otherwise it would be slowed too.
-- Death pause 0.55 s: the player sees what killed them, but restart is
-  still fast enough to keep the "one more try" flow.
-- Screen shake on the Camera2D: random offset added to the base offset,
-  decays with frame-rate independent smoothing. Strong on death, light on
-  hard landings, so its intensity carries meaning.
-- Goal: confetti + 1 s celebration before restarting/next level.
-  `reached` flag prevents triggering twice.
-- Particles are added to the level, not the player, so they stay where
-  they spawned.
-- Fixed: Void polygon points in wrong order made a bowtie shape.
+## Architecture
 
-For the exam
-Feedback scales with the event. Small hop, small puff; big fall, big puff and a shake; death, explosion, freeze and a big shake. Since effect size matches how important an event is, the player learns what matters without being told. That's the "visual cues and feedback" criterion directly.
-Hit-stop is used in games like Celeste and fighting games. A tiny freeze makes an impact feel heavy, and here it also makes clear exactly what killed you.
-Fast restart is a design choice. A long death screen punishes the player; a short pause plus an instant retry keeps them in the flow, which matters in a hard, short-level game like this.
-await with timers lets one function describe a whole sequence in order (freeze, unfreeze, wait, restart) without a state machine.
+```
+scenes/
+  player.tscn            CharacterBody2D + PlayerVisual + ShakeCamera
+  platform.tscn          StaticBody2D, @tool, size set in Inspector
+  moving_platform.tscn   AnimatableBody2D (carries the player)
+  crumble_platform.tscn  StaticBody2D + Trigger Area2D
+  spike / coin / goal / speed_pad / turn_pad .tscn   Area2D + signals
+  background.tscn        Parallax2D layers (clouds, hills, bushes, void)
+  hud.tscn               CanvasLayer: HUD, pause menu, level complete
+  ui/main_menu.tscn      Start, Levels (unlocking), Credits, Quit
+  levels/level_01..07.tscn
+scripts/                 one script per scene + helpers
+audio/                   generated .wav files
+tools/                   sound generator, level simulations, death report
+```
 
+- **Autoloads (singletons):** `Audio` (music survives level restarts, pool of 8 players, pitch variation) and `GameManager` (level order, coins, deaths, navigation, save file, playtest log).
+- **Signals** for events (`body_entered`, `coins_changed`, `level_completed`): objects don't need to know about each other.
+- **Groups** (`player`, `goal`, `coins`) to find nodes without hard-coded paths.
+- **All art is drawn in code** with `_draw()`; `@tool` scripts show it in the editor.
+- **Saved progress:** `user://save.cfg` (ConfigFile): beaten levels and best coins. Levels unlock in order.
 
+## Testing
 
+1. **Physics simulation** (`tools/sim*.py`): the game's own numbers (gravity, jump speed, hitboxes, coyote time, speed pads, moving/crumbling platforms, turn arrows). For every level it checks that the level can be finished, that new mechanics are really required (e.g. level 4 is impossible without the double jump), that all coins are reachable in one run, and which press styles (full jumps only, quick taps only) can finish it.
+2. **Playtests** with the death counter and the playtest log (`user://playtest_log.csv`, summarized by `tools/death_report.py` into a per-level death heatmap).
+3. **Fixes from playtests** (selection):
+   - Level 4: 32 deaths at one ledge. The cut air jump made the ledge impossible with quick taps (0 working timings). Air jump made full height, ledge lowered 160 → 140 px: quick taps 0 → 588 working timings.
+   - Levels 6–7: tower ledges stacked directly on top of each other (head bonks, no time to react after turning). Rebuilt with 560 px ledges overlapping only 25%: 61 → 155 working timings for the same climb; an extra turn arrow lets a missed jump loop back instead of dying.
+   - Level 5 felt easier than level 4 = dip in the difficulty curve, noted for balancing.
+   - Bugs found by playing: player ran off the last platform after the goal, HUD had zero width, duplicated background drawn in front, void not covering the screen.
 
-### Audio (16/10)
-- All sounds and music generated from basic waveforms (square, triangle,
-  noise) with tools/make_sounds.py: no licensing issues.
-- Sounds: jump (rising chirp), spike death (crunch + falling "pheww"),
-  pit fall (slide whistle fading into silence), goal fanfare, coin.
-- Music: 16-bar chiptune loop (Am-F-C-G), 150 BPM.
-- Audio manager is an autoload ("Audio"): created once, survives scene
-  reloads, so the music doesn't restart after every death.
-- Pool of 8 AudioStreamPlayers reused in turn: sounds can overlap without
-  creating new nodes each time.
-- Random pitch variation on the jump sound so the most frequent sound
-  never feels repetitive.
-- Pit fall: whistle starts when the player drops below the ground (pit_y),
-  and the music fades out with a Tween, like falling down a well. It
-  fades back in on restart. Spike and pit deaths sound different, so the
-  player hears what killed them.
+## Dev log (condensed)
 
-  
-For the exam
-Autoload (singleton): a node Godot creates at startup that lives outside the scenes. That's why the music survives reload_current_scene(); a music player inside the level would restart on every death, which gets very annoying in a game where you die often.
-Sound tells the player what happened. Spike and pit deaths sound different, so the player knows the cause without looking. That's the "auditory cues" part of the teaching criterion.
-Pitch variation: the jump is the most frequent sound in the game. A small random change in pitch keeps it from sounding mechanical over hundreds of jumps.
-Tweens animate a property smoothly over time, here the music volume, with one line of code.
+- **30/9–7/10:** project setup; player with auto-run, coyote time, jump buffer, variable jump height; reusable scenes; level 1.
+- **8/10:** game seminar.
+- **13/10:** code-drawn art: parallax background, brick platforms, shaded spikes.
+- **14–15/10:** animated character with squash & stretch; juice (particles, shake, hit-stop).
+- **16/10:** generated sound effects and music; audio autoload.
+- **17–18/10:** coins, HUD, GameManager; level complete screen, pause menu, victory pose.
+- **19–20/10:** main menu, level select with unlocking, saved progress; first export; levels 2–3 with speed pads.
+- **21–22/10:** double jump with wings + level 4 (tuned after playtest); moving and crumbling platforms + level 5.
+- **23–26/10:** turn arrows + level 6; level 7; world palettes; playtest death logging.
+- **29–30/10:** sibling playtest: towers in levels 6–7 rebuilt; final export and recordings.
 
+## Running / building
 
+- Open the folder in Godot 4.7.2 and press F5 (main scene: `scenes/ui/main_menu.tscn`).
+- Export: Project → Export → Windows Desktop (Embed PCK) → single `OneButtonHell.exe`.
+- Regenerate sounds: `python tools/make_sounds.py` (needs numpy).
 
-### Coins + HUD + GameManager (17/10)
-- Coin: Area2D drawn in code, spins (width squeezed with cos) and bobs.
-  Collect = sparkles + sound + counter update.
-- Coin hitbox (r=18) is bigger than its drawing (r=13): rewards are easy
-  to grab, hazards (spikes) have smaller hitboxes. Generous both ways.
-- GameManager autoload: coins this attempt, total coins, deaths in the
-  current level. Survives reloads, so deaths keep counting; coins reset
-  each attempt, so all coins require one clean run (skill element).
-- Signal coins_changed: the HUD reacts when a coin is collected
-  instead of checking every frame (observer pattern).
-- level.gd on every level root: counts coins via the "coins" group.
-  Works because a parent's _ready runs after all its children's.
-- HUD in a CanvasLayer (fixed on screen, ignores camera), drawn in code:
-  coin counter with "pop" animation, death counter, progress bar
-  (player marker moving toward a flag) = shows how far you are without text.
-- HUD ignores mouse input, so clicking still jumps.
-- Level 1 coins along the main path; first coin is free (teaches what
-  coins are), one needs a full held jump.
+## Credits
 
-
-### For the exam
-Groups are Godot's tags. Nodes join a group like "coins," "player" or "goal," and any script can find them without knowing where they sit in the tree. That keeps scenes loosely connected.
-Signals vs. polling: the HUD's coin pop is triggered by the coins_changed signal, so it reacts exactly when something happens. The progress bar does read the player position every frame, because that changes continuously. Knowing when to use which is good design reasoning.
-Coins reset on death is a design choice: collecting everything requires a clean run, which separates experienced players from beginners. That's the "skill" criterion.
-The progress bar answers "how far is it?" without words, and makes near-misses motivating ("I was at 90%!").
-
-
-### Level complete + pause menu (18/10)
-- GameManager holds the level order (LEVELS list) and all navigation:
-  next level, restart, main menu. One place to add new levels.
-- Level complete screen: coins x/y, "All coins collected!", deaths, best
-  coins, buttons Next Level / Replay / Main Menu. Last level shows
-  "YOU BEAT THE GAME!" without Next. Fades in after the confetti.
-- Signal level_completed: the goal doesn't know about the UI, it just
-  reports to GameManager and the screen reacts (loose coupling).
-- Pause menu (Esc/P): get_tree().paused stops the game; the menu uses
-  PROCESS_MODE_ALWAYS so it keeps working while everything else is paused.
-- Every new scene unpauses in start_level, so the game can never get
-  stuck paused after a restart.
-- One-button friendly: first button is preselected, Space/Enter presses
-  it, with a white border showing the selection.
-- UIKit: shared code-built styles (StyleBoxFlat) so all menus match the
-  game's colors (purple buttons, gold titles).
-- Bug fixed: player ran off the last platform after the goal and died.
-  Now finish() brakes to a stop and shows a victory pose; die() is
-  ignored after finishing.
-
-
-For the exam
-Pausing in Godot: get_tree().paused = true stops every node whose process mode is "pausable" (the default), and nodes set to ALWAYS keep running. That's why the pause menu can still respond while the game is frozen.
-Centralizing the level order: levels don't point to each other; GameManager owns the list. Adding, removing or reordering levels is a one-line change, with no risk of a broken chain between levels.
-Feedback loop for skill: the complete screen shows coins, deaths and your best. Experienced players get a reason to replay ("can I get all 5 with zero deaths?"), which supports the skill criterion beyond simply finishing.
-Bug found by playtesting: the post-goal death came from actually playing and noticing. Mention it as part of your testing story.
-
-
-
-### Main menu + saved progress (19/10, done 20/10)
-- Main menu scene reuses Background, Platform and PlayerVisual: same
-  world as the game, character running on the ground.
-- Pages built in code (main, levels, credits) with the shared UIKit.
-- Levels unlock in order (beat level N to open N+1), so players meet
-  the difficulty curve in the intended order = progression.
-- Level select shows best coins per level ("4 / 5") = replay goal for
-  skilled players.
-- Progress saved with ConfigFile to user://save.cfg (no account needed),
-  loaded when the game starts.
-- Reset Progress needs two presses (prevents accidents).
-- Testing cheat: U on the Levels page unlocks all levels for the
-  session only, never saved.
-- Fully playable with one button: first button preselected, Space
-  presses it; Esc = back.
-- Credits instead of contact details: the game and videos are public.
-
-
-### For the exam
-user:// vs res://: res:// is the game's own files, read-only once exported. user:// is a per-player folder Godot creates on their computer (on Windows, inside AppData), where the game is allowed to write. That's why the save file goes there.
-ConfigFile is Godot's simple key-value format, like a small settings file. It handles dictionaries and arrays directly, so saving progress takes just a few lines.
-Locked levels serve the design: unlocking in order ensures every player experiences the teaching levels before the hard ones. A beginner can't skip straight into level 6 and get confused by mechanics never introduced.
-
-
-
-
-### Levels 2-3 + speed pads + first export (20/10, done 21/10)
-- Level 2 "Patterns": spike rhythm (jump-land-jump), step-up platform,
-  triple spike (needs a held jump), floating platform with 2 coins over
-  the safe path (risk/reward), spike right after a landing.
-- Level 3 "Faster": speed pads (cyan chevrons; cyan only ever means
-  speed) take the run speed 300 -> 380 -> 450. Introduced on an easy
-  stretch first, then combined with gaps and spikes.
-- Camera look-ahead grows with speed (tweened), so reaction time stays
-  fair at higher speed.
-- Wall crash: hitting the side of a platform = death (an auto-runner
-  would otherwise be stuck pushing against the wall forever).
-- Levels validated with a physics simulation (tools/sim.py, solve.py):
-  same gravity, jump, hitboxes and coyote time as the game. Checks
-  that each level is finishable with full jumps only (beginner), not
-  with taps only, and that all coins can be taken in one run.
-- Level files generated from validated layouts, then tested by playing.
-- First Windows export (single .exe, embedded PCK) to catch export
-  problems early.
-
-
-For the exam
-Design reasoning for level 2: each section tests one idea from level 1 in a harder form: rhythm instead of a single spike, a held jump instead of any jump, height instead of flat ground. The floating platform is the first real risk/reward choice: safe and coinless underneath, or a precise jump for 2 coins.
-Introducing speed safely (level 3): the first pad comes on an easy stretch, so the player feels the speed change before it matters. Only after that is speed combined with obstacles. That's exactly "introduce a mechanic in a safe situation first" from your game plan.
-Look-ahead scaling shows you thought about fairness: at higher speed, obstacles arrive faster, so the camera shows more of what's coming.
-The simulation is a strong exam point. It shows you tested systematically: you used the game's own physics numbers to check that the levels are possible, which skills they require, and that coins are reachable, before playtesting with people.
-
-
-
-### Double jump + level 4 (21/10, done 22/10)
-- Air jump: a press in mid-air (after coyote time) uses an air jump if
-  one is left; otherwise it is buffered for the ground. Landing refills
-  it. Air jump is 0.9x ground strength; variable height still works.
-- Turned on per level (level.gd: double_jump = true) from level 4, and
-  stays on for later levels: a learned mechanic keeps being used.
-- Teaching without text:
-  - Wings on the character = "you have an air jump". They burst into
-    feathers when used and come back on landing (shows the resource).
-  - Own sound ("ba-ding") so the second jump is heard as different.
-  - Level opens with a safe discovery zone: coins only reachable with a
-    double jump, no danger.
-- Level 4 "Wings" (longer, ~6400 px): too-wide gap, too-high ledge, wide
-  gap + spike on landing, high floating platform with 2 coins (risk),
-  staircase finale to a goal on a high platform.
-- Validated with tools/sim2.py: finishable WITH double jump, impossible
-  WITHOUT it (mechanic is required), all 6 coins reachable in one run,
-  discovery coins need the double jump.
-
-
-### Playtest fix: double jump too hard (done on 23/10 but work for 21/10)
-- Playtest: 32 deaths at level 4's high ledge, right after the double
-  jump is introduced = difficulty spike in the wrong place.
-- Diagnosis with the simulation (tools/ledge2.py): players instinctively
-  double-TAP. The air jump was cut short on release like the ground
-  jump, so with quick taps the ledge had 0 working timings.
-- Fixes:
-  - Air jump always full height (can't be cut). Variable height stays
-    on the ground jump, where it is a skill element.
-  - Air jump strength 0.9 -> 1.0.
-  - Ledge 160 -> 140 px and no gap in front (miss = wall bonk, not a fall).
-- Result: quick double-tap 0 -> 588 working timings, held presses
-  783 -> ~1300. Level still impossible without the double jump, all
-  coins still collectable, now finishable with quick taps only.
-- Rejected idea: glide on hold. Holding already means "jump higher",
-  so a glide would give the one button two meanings in the air.
-
-For the exam
-Showing resources visually: the wings are a resource indicator built into the character. You never need a UI counter, because the player sees at a glance whether a jump is left. That's teaching through visuals in its purest form.
-Discover, then require: the discovery zone lets the player experiment with no risk, and only then does the level require the double jump to progress. That's the "introduce safely, then challenge" pattern from your game plan, and the simulation proves the requirement is real.
-Input design: deciding whether a mid-air press is an air jump or a buffered ground jump depends on whether the player is still within coyote time. That's a deliberate choice that keeps both earlier game-feel features working with the new mechanic.
-
-
-### Moving + crumbling platforms, level 5 (22/10, done 23/10)
-- Moving platform: AnimatableBody2D moved in _physics_process, carries
-  the player. Smooth back-and-forth with cosine easing (slows at the
-  ends, so turning points are readable). Draws a dotted track of its
-  full path = the player can predict it before arriving.
-- Crumbling platform: thin Trigger area on top; standing on it ->
-  shakes + rumble sound for 0.5 s -> breaks into debris (collision off),
-  faint outline remains, comes back after 3 s. Timers pause with the
-  game.
-- Own visual language: wood = moves, cracked sandstone = breaks. No
-  other object uses these colors.
-- Auto-runner insight: the player always reaches a given x at the same
-  time, so moving platforms are in the same spot every attempt = a
-  learnable pattern, never random. Vertical movement only, because
-  riding a horizontal mover would shift that timing.
-- Level 5 "Moving Parts": safe crumble intro above solid ground (falling
-  is harmless), bobbing steps over a pit, elevator to a ledge 250 px up
-  (beyond the double jump), crumbling bridge, final bobber.
-- Validated per section with tools/sim3.py (moving + crumbling physics):
-  timings scanned, elevator and bridge required (can't be skipped), all
-  coins reachable, intro safe to ignore.
-
-
-  For the exam
-Readable motion: the dotted track and the cosine easing (slowing down at the ends) make every moving platform predictable. Players fail because of their own timing, not because something surprised them, which is what makes difficulty feel fair.
-Safe introduction, again: crumbling platforms first appear above solid ground, so the first experience of one breaking costs nothing. Only later does a crumbling bridge sit over a pit. It's the same pattern as the double jump's discovery zone, and you can point out that you applied it consistently.
-Determinism in auto-runners is a thoughtful design observation. It explains why you chose vertical movement and why the levels are learnable through repetition, which ties into the skill criterion: experienced players learn the patterns and go faster through them.
+Made by the author for TDDD23, Linköping University, 2026. Made with Godot Engine 4.7. Art, sound effects and music created in code.

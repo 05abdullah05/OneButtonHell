@@ -14,10 +14,15 @@ const LEVELS: Array[String] = [
 	"res://scenes/levels/level_03.tscn",
 	"res://scenes/levels/level_04.tscn",
 	"res://scenes/levels/level_05.tscn",
+	"res://scenes/levels/level_06.tscn",
+	"res://scenes/levels/level_07.tscn",
 ]
 const MAIN_MENU := "res://scenes/ui/main_menu.tscn"
 # user:// is a folder Godot creates for each game on the player's computer.
 const SAVE_PATH := "user://save.cfg"
+# Playtest log: every death (with position) and every finished level is
+# written here, so playtests produce real data for balancing.
+const LOG_PATH := "user://playtest_log.csv"
 
 var current_level: String = ""   # file path of the level being played
 var coins_collected: int = 0     # coins picked up in THIS attempt
@@ -54,8 +59,9 @@ func collect_coin() -> void:
 	coins_changed.emit(coins_collected, coins_total)
 
 
-func add_death() -> void:
+func add_death(where: Vector2 = Vector2.ZERO, cause: String = "") -> void:
 	deaths += 1
+	log_event("death", where, cause)
 
 
 func complete_level() -> void:
@@ -64,6 +70,8 @@ func complete_level() -> void:
 	best_coins[current_level] = maxi(get_best_coins(current_level), coins_collected)
 	coin_totals[current_level] = coins_total
 	save_progress()
+	log_event("complete", Vector2.ZERO,
+			"coins %d/%d; deaths %d" % [coins_collected, coins_total, deaths])
 	level_completed.emit()
 
 
@@ -79,6 +87,22 @@ func has_next_level() -> bool:
 # Level 1 is always open; every other level opens when the one before is beaten.
 func is_unlocked(index: int) -> bool:
 	return index == 0 or unlock_all_levels or completed.has(LEVELS[index - 1])
+
+
+# --- Playtest log ---
+
+# Appends one line to the CSV log: time, level, event, x, y, details.
+func log_event(event: String, where: Vector2 = Vector2.ZERO, details: String = "") -> void:
+	var exists := FileAccess.file_exists(LOG_PATH)
+	var f := FileAccess.open(LOG_PATH, FileAccess.READ_WRITE if exists else FileAccess.WRITE)
+	if f == null:
+		return
+	if exists:
+		f.seek_end()
+	else:
+		f.store_line("time,level,event,x,y,details")
+	f.store_line("%s,%s,%s,%d,%d,%s" % [Time.get_datetime_string_from_system(),
+			current_level.get_file().get_basename(), event, int(where.x), int(where.y), details])
 
 
 # --- Saving and loading ---

@@ -30,6 +30,8 @@ var was_on_floor: bool = true
 var is_falling_in_pit: bool = false
 var air_jumps_left: int = 0
 var can_cut_jump: bool = false   # only the GROUND jump can be cut short by releasing
+var direction: int = 1               # 1 = running right, -1 = running left (turn arrows)
+var distance_travelled: float = 0.0  # for the progress bar in levels that turn around
 
 
 func _ready() -> void:
@@ -46,7 +48,7 @@ func _physics_process(delta: float) -> void:
 	if is_finished:
 		velocity.x = move_toward(velocity.x, 0.0, finish_brake * delta)
 	else:
-		velocity.x = run_speed
+		velocity.x = run_speed * direction
 
 	# 2. Gravity + coyote time.
 	if is_on_floor():
@@ -63,7 +65,9 @@ func _physics_process(delta: float) -> void:
 	# 6. Let Godot move the body and resolve collisions.
 	# Save the falling speed first: move_and_slide sets it to 0 on landing.
 	var fall_speed := velocity.y
+	var x_before := global_position.x
 	move_and_slide()
+	distance_travelled += absf(global_position.x - x_before)
 
 	# 7. Landing: squash + dust, both bigger after a bigger fall.
 	var on_floor_now := is_on_floor()
@@ -89,7 +93,7 @@ func _physics_process(delta: float) -> void:
 	# 10. Ran into the side of a platform = crash. Without this the
 	# auto-runner would be stuck pushing against the wall forever.
 	if is_on_wall():
-		die("spike")
+		die("wall")
 		return
 
 	# 11. Fell far enough = dead.
@@ -134,7 +138,7 @@ func _air_jump() -> void:
 	can_cut_jump = false
 	visual.squash(Vector2(0.75, 1.25))
 	# The wings "burst" into feathers: the ability is used up until landing.
-	FX.burst(_level(), global_position + Vector2(-8, -10), PackedColorArray(FEATHERS),
+	FX.burst(_level(), global_position + Vector2(-8 * direction, -10), PackedColorArray(FEATHERS),
 			12, 160.0, Vector2.DOWN, 70.0, 6.0, 0.5, 200.0)
 	Audio.play("double_jump", -5.0, 0.04)
 
@@ -149,7 +153,15 @@ func set_air_jumps(amount: int) -> void:
 # so the player still gets the same reaction time to see obstacles.
 func set_run_speed(new_speed: float) -> void:
 	run_speed = new_speed
-	camera.set_look_ahead(new_speed)
+	camera.set_look_ahead(new_speed * direction)
+
+
+# Called by turn arrows: run the other way. The character flips around and
+# the camera swings to look ahead in the new direction.
+func set_direction(new_direction: int) -> void:
+	direction = new_direction
+	visual.facing = new_direction
+	camera.set_look_ahead(run_speed * direction)
 
 
 # Called by the goal: stop running and celebrate.
@@ -158,13 +170,13 @@ func finish() -> void:
 	visual.celebrating = true
 
 
-# cause: "spike" (default, used by spikes) or "fall" (pits).
+# cause: "spike" (default, used by spikes), "wall" (crash) or "fall" (pits).
 func die(cause: String = "spike") -> void:
 	if is_dead or is_finished:
 		return
 	is_dead = true
 	velocity = Vector2.ZERO
-	GameManager.add_death()
+	GameManager.add_death(global_position, cause)
 
 	# Burst into pieces in the character's own colors.
 	visual.visible = false
@@ -172,7 +184,7 @@ func die(cause: String = "spike") -> void:
 			visual.shirt_color, visual.skin_color, visual.hair_color, visual.pants_color]),
 			30, 420.0, Vector2.UP, 180.0, 7.0, 0.8, 900.0)
 	camera.shake(14.0)
-	if cause == "spike":
+	if cause != "fall":
 		Audio.play("death")
 	# (a pit fall already played its whistle, so no extra sound)
 

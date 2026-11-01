@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://b0gkcx4bulpj8"]
+
+[ext_resource type="Script" uid="uid://dod7weoptno1f" path="res://scripts/turn_pad.gd" id="1_turn"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_turn"]
+size = Vector2(30, 160)
+
+[node name="TurnPad" type="Area2D" unique_id=1343111194]
+script = ExtResource("1_turn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=12525857]
+position = Vector2(0, -80)
+shape = SubResource("RectangleShape2D_turn")

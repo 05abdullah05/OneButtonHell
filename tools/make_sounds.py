@@ -116,6 +116,12 @@ rumble = np.convolve(noise, np.ones(25) / 25, mode="same") * 3.0     # low, muff
 clicks = (rng.uniform(0, 1, len(t)) > 0.985) * rng.uniform(-1, 1, len(t))
 save("crumble.wav", (rumble + clicks * 0.6) * np.exp(-t * 3) * envelope(len(t), 0.01, 0.1), 0.6)
 
+# --- Turn: quick "swish" down then up ----------------------------------------
+t = t_axis(0.22)
+freq = 500 + 350 * np.cos(2 * np.pi * t / 0.22)     # down, then back up
+swish = square(phase_from_freq(freq), 0.3) * 0.5 + np.convolve(rng.uniform(-1, 1, len(t)), np.ones(4) / 4, mode="same") * 0.4
+save("turn.wav", swish * np.sin(np.pi * t / 0.22) * envelope(len(t), 0.005, 0.03), 0.55)
+
 # --- Music: 16-bar chiptune loop (Am - F - C - G), 150 BPM ---------------
 BPM = 150
 beat = 60 / BPM

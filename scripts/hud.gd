@@ -33,8 +33,14 @@ func _on_coins_changed(collected: int, _total: int) -> void:
 func _process(delta: float) -> void:
 	coin_punch = lerpf(coin_punch, 1.0, 1.0 - exp(-10.0 * delta))
 	if is_instance_valid(player) and is_instance_valid(goal):
-		var p := inverse_lerp(start_x, goal.global_position.x, player.global_position.x)
-		progress = clampf(p, 0.0, 1.0)
+		var level := get_tree().current_scene as Level
+		var p: float
+		if level and level.path_length > 0.0:
+			# Levels that turn around: measure distance run, not x position.
+			p = player.distance_travelled / level.path_length
+		else:
+			p = inverse_lerp(start_x, goal.global_position.x, player.global_position.x)
+		progress = maxf(progress, clampf(p, 0.0, 1.0))   # never moves backwards
 	queue_redraw()
 
 
